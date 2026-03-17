@@ -1,0 +1,53 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  background: #020617;
+  color: #e5e7eb;
+  font-family: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Arcade CRT pixel look */
+.arcade-screen {
+  font-family: "Press Start 2P", cursive;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+.arcade-screen * {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* Center content frame: subtle border and corner glow */
+.arcade-frame {
+  position: relative;
+}
+.arcade-frame::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border: 2px solid rgba(251, 191, 36, 0.08);
+  border-radius: 4px;
+  pointer-events: none;
+}
+.arcade-frame::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.15), transparent);
+  pointer-events: none;
+}
