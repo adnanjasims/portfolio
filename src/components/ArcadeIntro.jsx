@@ -42,7 +42,7 @@ export default function ArcadeIntro() {
         <div className="rounded border-2 border-white/20 bg-black/60 p-4 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
           <p className="mb-2 text-[8px] text-amber-400/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>LOOKING FOR</p>
           <p className="text-[6px] leading-relaxed text-white/80" style={{ fontFamily: '"Press Start 2P", cursive' }}>
-            ROLES ACROSS SWE, DEVOPS, ML, WEB. I OWN FEATURES END TO END.
+            ROLES ACROSS SWE, DEVOPS, ML, WEB.
           </p>
         </div>
       </div>

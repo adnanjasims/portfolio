@@ -10,14 +10,19 @@ import ArcadeSidePanels from "./components/ArcadeSidePanels";
 
 const CHIRP_URL = import.meta.env.VITE_CHIRP_URL || "";
 const SMART_SUPPLY_URL = import.meta.env.VITE_SMART_SUPPLY_URL || "";
+const SMART_SUPPLY_GITHUB_URL = "https://github.com/adnanjasims/smart-supply";
+const EVENT_LOTTERY_URL = "https://github.com/adnanjasims/quanti-agents";
+const NEURAL_NETWORK_URL = "https://github.com/adnanjasims/neural-network";
 
 function App() {
   const [activeProject, setActiveProject] = useState(null);
 
   const projectLabel = (id) => {
     if (id === "chirp") return "Chirp, full-stack social platform";
-    if (id === "smart-supply") return "Smart Supply ML & Streamlit Dashboard";
+    if (id === "smart-supply") return "Smart Supply, inventory forecasting";
     if (id === "chess-engine") return "Chess Engine, UCI engine and web";
+    if (id === "event-lottery") return "Event Lottery, Android app";
+    if (id === "neural-network") return "Neural Network, C++ MLP engine";
     return id;
   };
 
@@ -105,17 +110,26 @@ function App() {
             {activeProject === "smart-supply" && (
               <div className="mb-4 space-y-3 text-[8px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
                 <p>
-                  SMART SUPPLY IS A DATA / ML PROJECT BUILT ON STREAMLIT. THE GOAL IS TO MAKE INVENTORY AND DEMAND QUESTIONS A BIT LESS HAND-WAVY.
+                  INVENTORY OPTIMIZATION WITH LIGHTGBM DEMAND FORECASTING ON THE WALMART M5 DATASET. CUTS WASTE AND STOCKOUTS, THEN COMPARES ML MODEL ORDERS VS A SIMPLE BASELINE.
                 </p>
                 <p className="text-white/60">
-                  I CAN TALK ABOUT THE MODELS, WHAT WORKED, AND WHERE THINGS COULD GO WITH MORE DATA AND TIME.
+                  PYTHON PIPELINE PLUS A STREAMLIT DASHBOARD FOR PROFIT, WASTE, AND ITEM-LEVEL RECS.
                 </p>
+                <a
+                  href={SMART_SUPPLY_GITHUB_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[8px] uppercase text-amber-400 hover:bg-amber-500/20"
+                  style={{ fontFamily: '"Press Start 2P", cursive' }}
+                >
+                  View on GitHub
+                </a>
                 {SMART_SUPPLY_URL.startsWith("http") && (
                   <a
                     href={SMART_SUPPLY_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[8px] uppercase text-amber-400 hover:bg-amber-500/20"
+                    className="mt-2 ml-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[8px] uppercase text-amber-400 hover:bg-amber-500/20"
                     style={{ fontFamily: '"Press Start 2P", cursive' }}
                   >
                     View live app
@@ -134,6 +148,44 @@ function App() {
                 <p className="text-white/60">
                   RUN AS UCI ENGINE VIA PYTHON OR POINT A GUI (ARENA, LICHESS) AT IT. PERFT TESTS IN TESTS/.
                 </p>
+              </div>
+            )}
+            {activeProject === "event-lottery" && (
+              <div className="mb-4 space-y-3 text-[8px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+                <p>
+                  ANDROID EVENT LOTTERY APP (CMPUT 301 / QUANTI-AGENTS). ORGANIZERS RUN EVENTS & ENTRANTS JOIN A WAITING LIST TO GET DRAWN INTO THE LOTTERY.
+                </p>
+                <p className="text-white/60">
+                  BUILT AS A TEAM ANDROID PROJECT WITH USER STORIES, UI MOCKS, AND CRC-DRIVEN DESIGN.
+                </p>
+                <a
+                  href={EVENT_LOTTERY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[8px] uppercase text-amber-400 hover:bg-amber-500/20"
+                  style={{ fontFamily: '"Press Start 2P", cursive' }}
+                >
+                  View on GitHub
+                </a>
+              </div>
+            )}
+            {activeProject === "neural-network" && (
+              <div className="mb-4 space-y-3 text-[8px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+                <p>
+                  MULTILAYER PERCEPTRON INFERENCE ENGINE IN C++ FROM SCRATCH. CUSTOM MATRIX CLASS, FORWARD PROP, RELU + SIGMOID (NO TENSORFLOW OR PYTORCH).
+                </p>
+                <p className="text-white/60">
+                  BUILT TO SHOW THE LINEAR ALGEBRA AND MEMORY SIDE OF INFERENCE. COMPILE WITH G++ AND RUN.
+                </p>
+                <a
+                  href={NEURAL_NETWORK_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[8px] uppercase text-amber-400 hover:bg-amber-500/20"
+                  style={{ fontFamily: '"Press Start 2P", cursive' }}
+                >
+                  View on GitHub
+                </a>
               </div>
             )}
             <button

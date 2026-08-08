@@ -1,6 +1,6 @@
 /**
  * Retro arcade screen: vertical project list, B&W, pixel font, full-row highlight on select.
- * Pixel-style logos for Chirp, Smart Supply, Chess Engine.
+ * Pixel-style logos for each project.
  */
 import { useState } from "react";
 
@@ -22,6 +22,18 @@ const PROJECTS = [
     label: "CHESS ENGINE",
     sublabel: "UCI ENGINE + WEB",
     Logo: ChessEnginePixelLogo,
+  },
+  {
+    id: "event-lottery",
+    label: "EVENT LOTTERY",
+    sublabel: "ANDROID APP",
+    Logo: EventLotteryPixelLogo,
+  },
+  {
+    id: "neural-network",
+    label: "NEURAL NETWORK",
+    sublabel: "C++ MLP ENGINE",
+    Logo: NeuralNetworkPixelLogo,
   },
 ];
 
@@ -69,6 +81,42 @@ function ChessEnginePixelLogo({ className = "h-8 w-8" }) {
   );
 }
 
+function EventLotteryPixelLogo({ className = "h-8 w-8" }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} fill="currentColor" style={{ imageRendering: "pixelated" }}>
+      {/* Phone + ticket stub */}
+      <rect x="3" y="1" width="6" height="14" fill="none" stroke="currentColor" strokeWidth="1" />
+      <rect x="4" y="3" width="4" height="8" opacity="0.85" />
+      <rect x="5" y="12" width="2" height="1" />
+      <rect x="10" y="5" width="5" height="6" />
+      <rect x="11" y="6" width="1" height="1" opacity="0.35" />
+      <rect x="13" y="6" width="1" height="1" opacity="0.35" />
+      <rect x="11" y="8" width="3" height="1" opacity="0.35" />
+    </svg>
+  );
+}
+
+function NeuralNetworkPixelLogo({ className = "h-8 w-8" }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} fill="currentColor" style={{ imageRendering: "pixelated" }}>
+      {/* 3-layer node graph */}
+      <rect x="1" y="2" width="2" height="2" />
+      <rect x="1" y="7" width="2" height="2" />
+      <rect x="1" y="12" width="2" height="2" />
+      <rect x="7" y="3" width="2" height="2" />
+      <rect x="7" y="7" width="2" height="2" />
+      <rect x="7" y="11" width="2" height="2" />
+      <rect x="13" y="5" width="2" height="2" />
+      <rect x="13" y="9" width="2" height="2" />
+      <rect x="3" y="3" width="4" height="1" opacity="0.45" />
+      <rect x="3" y="8" width="4" height="1" opacity="0.45" />
+      <rect x="3" y="12" width="4" height="1" opacity="0.45" />
+      <rect x="9" y="5" width="4" height="1" opacity="0.45" />
+      <rect x="9" y="10" width="4" height="1" opacity="0.45" />
+    </svg>
+  );
+}
+
 export default function ArcadeMenu({ onSelectProject, selectedProjectId = null }) {
   const [hoveredId, setHoveredId] = useState(null);
   const selected = hoveredId ?? selectedProjectId;
@@ -83,7 +131,7 @@ export default function ArcadeMenu({ onSelectProject, selectedProjectId = null }
       </div>
 
       {/* Vertical list */}
-      <div className="flex flex-1 flex-col gap-0 overflow-hidden">
+      <div className="flex flex-1 flex-col gap-0 overflow-y-auto">
         {PROJECTS.map((proj) => {
           const isSelected = selected === proj.id;
           const Logo = proj.Logo;

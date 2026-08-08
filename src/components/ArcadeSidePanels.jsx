@@ -17,6 +17,8 @@ export default function ArcadeSidePanels() {
             <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>1. CHIRP</p>
             <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>2. SMART SUPPLY</p>
             <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>3. CHESS</p>
+            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>4. EVENT LOTTERY</p>
+            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>5. NEURAL NET</p>
           </div>
           <div className="flex flex-col gap-1">
             {[1, 2, 3, 4].map((i) => (
