@@ -6,6 +6,24 @@ import { useState } from "react";
 
 const PROJECTS = [
   {
+    id: "doc-intel",
+    label: "DOC INTELLIGENCE",
+    sublabel: "OCR + DRAWINGS",
+    Logo: DocIntelPixelLogo,
+  },
+  {
+    id: "rail-interlock",
+    label: "RAIL INTERLOCK",
+    sublabel: "C SAFETY SYSTEM",
+    Logo: RailInterlockPixelLogo,
+  },
+  {
+    id: "warehouse-robot",
+    label: "WAREHOUSE ROBOT",
+    sublabel: "AMR SIMULATOR",
+    Logo: WarehouseRobotPixelLogo,
+  },
+  {
     id: "chirp",
     label: "CHIRP",
     sublabel: "FULL-STACK SOCIAL",
@@ -36,6 +54,51 @@ const PROJECTS = [
     Logo: NeuralNetworkPixelLogo,
   },
 ];
+
+function DocIntelPixelLogo({ className = "h-8 w-8" }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} fill="currentColor" style={{ imageRendering: "pixelated" }}>
+      {/* Page + scan lines */}
+      <rect x="3" y="1" width="10" height="14" fill="none" stroke="currentColor" strokeWidth="1" />
+      <rect x="5" y="4" width="6" height="1" />
+      <rect x="5" y="7" width="6" height="1" />
+      <rect x="5" y="10" width="4" height="1" />
+      <rect x="10" y="12" width="2" height="2" opacity="0.7" />
+    </svg>
+  );
+}
+
+function RailInterlockPixelLogo({ className = "h-8 w-8" }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} fill="currentColor" style={{ imageRendering: "pixelated" }}>
+      {/* Track + signal lamp */}
+      <rect x="1" y="11" width="14" height="1" />
+      <rect x="1" y="14" width="14" height="1" />
+      <rect x="3" y="11" width="1" height="4" opacity="0.45" />
+      <rect x="7" y="11" width="1" height="4" opacity="0.45" />
+      <rect x="11" y="11" width="1" height="4" opacity="0.45" />
+      <rect x="7" y="2" width="2" height="7" />
+      <rect x="6" y="2" width="4" height="3" />
+    </svg>
+  );
+}
+
+function WarehouseRobotPixelLogo({ className = "h-8 w-8" }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} fill="currentColor" style={{ imageRendering: "pixelated" }}>
+      {/* Grid floor + robot body */}
+      <rect x="1" y="1" width="2" height="2" opacity="0.3" />
+      <rect x="7" y="1" width="2" height="2" opacity="0.3" />
+      <rect x="13" y="1" width="2" height="2" opacity="0.3" />
+      <rect x="1" y="13" width="2" height="2" opacity="0.3" />
+      <rect x="13" y="13" width="2" height="2" opacity="0.3" />
+      <rect x="5" y="5" width="6" height="5" />
+      <rect x="6" y="4" width="4" height="1" />
+      <rect x="4" y="11" width="2" height="2" />
+      <rect x="10" y="11" width="2" height="2" />
+    </svg>
+  );
+}
 
 function ChirpPixelLogo({ className = "h-8 w-8" }) {
   return (

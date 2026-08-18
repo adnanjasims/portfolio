@@ -14,11 +14,11 @@ export default function ArcadeSidePanels() {
           </div>
           <div className="w-full rounded border-2 border-white/20 bg-black/60 p-3">
             <p className="mb-2 text-[6px] text-white/60" style={{ fontFamily: '"Press Start 2P", cursive' }}>HIGH SCORES</p>
-            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>1. CHIRP</p>
-            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>2. SMART SUPPLY</p>
-            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>3. CHESS</p>
-            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>4. EVENT LOTTERY</p>
-            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>5. NEURAL NET</p>
+            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>1. DOC INTEL</p>
+            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>2. RAIL INTERLOCK</p>
+            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>3. WAREHOUSE</p>
+            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>4. CHIRP</p>
+            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>5. CHESS</p>
           </div>
           <div className="flex flex-col gap-1">
             {[1, 2, 3, 4].map((i) => (

@@ -13,11 +13,17 @@ const SMART_SUPPLY_URL = import.meta.env.VITE_SMART_SUPPLY_URL || "";
 const SMART_SUPPLY_GITHUB_URL = "https://github.com/adnanjasims/smart-supply";
 const EVENT_LOTTERY_URL = "https://github.com/adnanjasims/quanti-agents";
 const NEURAL_NETWORK_URL = "https://github.com/adnanjasims/neural-network";
+const DOC_INTEL_URL = "https://github.com/adnanjasims/doc-intel";
+const RAIL_INTERLOCK_URL = "https://github.com/adnanjasims/rail-interlock-system";
+const WAREHOUSE_ROBOT_URL = "https://github.com/adnanjasims/warehouse-robot";
 
 function App() {
   const [activeProject, setActiveProject] = useState(null);
 
   const projectLabel = (id) => {
+    if (id === "doc-intel") return "Doc Intelligence, OCR for drawings";
+    if (id === "rail-interlock") return "Railway Interlock, C safety system";
+    if (id === "warehouse-robot") return "Warehouse Robot, AMR simulator";
     if (id === "chirp") return "Chirp, full-stack social platform";
     if (id === "smart-supply") return "Smart Supply, inventory forecasting";
     if (id === "chess-engine") return "Chess Engine, UCI engine and web";
@@ -86,6 +92,54 @@ function App() {
             <h2 className="mb-4 border-b border-white/30 pb-2 text-[12px] text-amber-400" style={{ fontFamily: '"Press Start 2P", cursive' }}>
               {projectLabel(activeProject)}
             </h2>
+            {activeProject === "doc-intel" && (
+              <div className="mb-4 space-y-3 text-[8px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+                <p>
+                  READS ENGINEERING PDFS AND DRAWINGS. EXTRACTS TABLES AND FIELDS, THEN CHECKS THEM AGAINST SIMPLE RULES.
+                </p>
+                <a
+                  href={DOC_INTEL_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[8px] uppercase text-amber-400 hover:bg-amber-500/20"
+                  style={{ fontFamily: '"Press Start 2P", cursive' }}
+                >
+                  View on GitHub
+                </a>
+              </div>
+            )}
+            {activeProject === "rail-interlock" && (
+              <div className="mb-4 space-y-3 text-[8px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+                <p>
+                  SAFETY CRITICAL C INTERLOCK AND FAULT DETECTION FOR RAILWAY TRANSIT.
+                </p>
+                <a
+                  href={RAIL_INTERLOCK_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[8px] uppercase text-amber-400 hover:bg-amber-500/20"
+                  style={{ fontFamily: '"Press Start 2P", cursive' }}
+                >
+                  View on GitHub
+                </a>
+              </div>
+            )}
+            {activeProject === "warehouse-robot" && (
+              <div className="mb-4 space-y-3 text-[8px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+                <p>
+                  WAREHOUSE ROBOT SIMULATOR WITH MAP, LIDAR, PATH PLANNING, AND LOCAL AVOIDANCE.
+                </p>
+                <a
+                  href={WAREHOUSE_ROBOT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[8px] uppercase text-amber-400 hover:bg-amber-500/20"
+                  style={{ fontFamily: '"Press Start 2P", cursive' }}
+                >
+                  View on GitHub
+                </a>
+              </div>
+            )}
             {activeProject === "chirp" && (
               <div className="mb-4 space-y-3 text-[8px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
                 <p>
