@@ -9,7 +9,7 @@ export default function ArcadeChessSection() {
       {/* Divider */}
       <div className="mx-auto mb-6 flex w-full max-w-md items-center gap-3">
         <span className="h-px flex-1 bg-gradient-to-r from-transparent to-emerald-600/40" />
-        <span className="text-[6px] text-emerald-500/70" style={{ fontFamily: '"Press Start 2P", cursive' }}> CHESS </span>
+        <span className="text-[8px] text-emerald-500/70" style={{ fontFamily: '"Press Start 2P", cursive' }}> CHESS </span>
         <span className="h-px flex-1 bg-gradient-to-l from-transparent to-emerald-600/40" />
       </div>
 
@@ -29,10 +29,10 @@ export default function ArcadeChessSection() {
               </svg>
             </div>
             <div>
-              <p className="text-[6px] uppercase tracking-widest text-emerald-500/80" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <p className="text-[8px] uppercase tracking-widest text-emerald-500/80" style={{ fontFamily: '"Press Start 2P", cursive' }}>
                 Play me on Chess.com
               </p>
-              <p className="mt-1 text-[10px] font-bold tracking-wide text-emerald-300/95" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <p className="mt-1 text-[12px] font-bold tracking-wide text-emerald-300/95" style={{ fontFamily: '"Press Start 2P", cursive' }}>
                 ToxicChunk
               </p>
             </div>
@@ -41,13 +41,13 @@ export default function ArcadeChessSection() {
             href={chessProfileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-2 flex-shrink-0 rounded border-2 border-emerald-600/80 bg-emerald-950/80 px-4 py-2 text-[8px] uppercase text-emerald-300 transition hover:bg-emerald-800/40 hover:text-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 sm:mt-0"
+            className="mt-2 flex-shrink-0 rounded border-2 border-emerald-600/80 bg-emerald-950/80 px-4 py-2 text-[10px] uppercase text-emerald-300 transition hover:bg-emerald-800/40 hover:text-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 sm:mt-0"
             style={{ fontFamily: '"Press Start 2P", cursive' }}
           >
             Open profile
           </a>
         </div>
-        <p className="mt-4 text-center text-[5px] text-emerald-600/70" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+        <p className="mt-4 text-center text-[7px] text-emerald-600/70" style={{ fontFamily: '"Press Start 2P", cursive' }}>
           CHALLENGE ME · BLITZ · RAPID · BULLET
         </p>
       </div>

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import ArcadeBootScreen from "./components/ArcadeBootScreen";
 import ArcadeCabinet from "./components/ArcadeCabinet";
 import ArcadeChessSection from "./components/ArcadeChessSection";
 import ArcadeFooter from "./components/ArcadeFooter";
@@ -19,6 +20,17 @@ const WAREHOUSE_ROBOT_URL = "https://github.com/adnanjasims/warehouse-robot";
 
 function App() {
   const [activeProject, setActiveProject] = useState(null);
+  const [booting, setBooting] = useState(true);
+  const [contentReady, setContentReady] = useState(false);
+
+  const handleBootDone = useCallback(() => {
+    setBooting(false);
+    // wait a frame so entrance fades start from opacity 0
+    requestAnimationFrame(() => setContentReady(true));
+  }, []);
+
+  const enter = (delayClass = "") =>
+    `arcade-enter ${delayClass} ${contentReady ? "is-ready" : ""}`.trim();
 
   const projectLabel = (id) => {
     if (id === "doc-intel") return "Doc Intelligence, OCR for drawings";
@@ -34,23 +46,27 @@ function App() {
 
   return (
     <div className="min-h-screen w-full bg-[#060608] text-white">
+      {booting && <ArcadeBootScreen onDone={handleBootDone} />}
+
       {/* Subtle grid background for center */}
       <div className="fixed inset-0 z-0 opacity-[0.03]" style={{ backgroundImage: "linear-gradient(rgba(251,191,36,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(251,191,36,0.1) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
 
       <ArcadeSidePanels />
 
       <ArcadePageFrame>
-        <ArcadeIntro />
+        <div className={enter("arcade-enter-delay-1")}>
+          <ArcadeIntro />
+        </div>
 
-        <section id="projects" className="flex flex-col items-center justify-center py-6">
+        <section id="projects" className={`flex flex-col items-center justify-center py-6 ${enter("arcade-enter-delay-2")}`}>
           <ArcadeCabinet>
             <ArcadeMenu onSelectProject={setActiveProject} />
           </ArcadeCabinet>
         </section>
 
         {(CHIRP_URL.startsWith("http") || SMART_SUPPLY_URL.startsWith("http")) && (
-          <section className="mx-auto flex w-full max-w-2xl flex-wrap items-center justify-center gap-4 px-4 py-3">
-            <p className="w-full text-center text-[5px] uppercase tracking-widest text-amber-500/60" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+          <section className={`mx-auto flex w-full max-w-2xl flex-wrap items-center justify-center gap-4 px-4 py-3 ${enter("arcade-enter-delay-3")}`}>
+            <p className="w-full text-center text-[7px] uppercase tracking-widest text-amber-500/60" style={{ fontFamily: '"Press Start 2P", cursive' }}>
               Live apps
             </p>
             {CHIRP_URL.startsWith("http") && (
@@ -58,7 +74,7 @@ function App() {
                 href={CHIRP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded border-2 border-amber-500/60 bg-amber-950/40 px-4 py-2 text-[6px] uppercase text-amber-400/90 hover:bg-amber-500/20"
+                className="rounded border-2 border-amber-500/60 bg-amber-950/40 px-4 py-2 text-[8px] uppercase text-amber-400/90 hover:bg-amber-500/20"
                 style={{ fontFamily: '"Press Start 2P", cursive' }}
               >
                 Chirp
@@ -69,7 +85,7 @@ function App() {
                 href={SMART_SUPPLY_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded border-2 border-amber-500/60 bg-amber-950/40 px-4 py-2 text-[6px] uppercase text-amber-400/90 hover:bg-amber-500/20"
+                className="rounded border-2 border-amber-500/60 bg-amber-950/40 px-4 py-2 text-[8px] uppercase text-amber-400/90 hover:bg-amber-500/20"
                 style={{ fontFamily: '"Press Start 2P", cursive' }}
               >
                 Smart Supply
@@ -78,22 +94,28 @@ function App() {
           </section>
         )}
 
-        <ChessEngineEmbed />
+        <div className={enter("arcade-enter-delay-3")}>
+          <ChessEngineEmbed />
+        </div>
 
-        <ArcadeChessSection />
+        <div className={enter("arcade-enter-delay-4")}>
+          <ArcadeChessSection />
+        </div>
 
-        <ArcadeFooter />
+        <div className={enter("arcade-enter-delay-5")}>
+          <ArcadeFooter />
+        </div>
       </ArcadePageFrame>
 
       {/* Project modal (arcade style) */}
       {activeProject && (
         <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/80 p-4">
           <div className="arcade-screen w-full max-w-lg rounded border-4 border-amber-500/80 bg-black p-6 shadow-[0_0_30px_rgba(251,191,36,0.2)]">
-            <h2 className="mb-4 border-b border-white/30 pb-2 text-[12px] text-amber-400" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+            <h2 className="mb-4 border-b border-white/30 pb-2 text-[14px] text-amber-400" style={{ fontFamily: '"Press Start 2P", cursive' }}>
               {projectLabel(activeProject)}
             </h2>
             {activeProject === "doc-intel" && (
-              <div className="mb-4 space-y-3 text-[8px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <div className="mb-4 space-y-3 text-[10px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
                 <p>
                   READS ENGINEERING PDFS AND DRAWINGS. EXTRACTS TABLES AND FIELDS, THEN CHECKS THEM AGAINST SIMPLE RULES.
                 </p>
@@ -101,7 +123,7 @@ function App() {
                   href={DOC_INTEL_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[8px] uppercase text-amber-400 hover:bg-amber-500/20"
+                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[10px] uppercase text-amber-400 hover:bg-amber-500/20"
                   style={{ fontFamily: '"Press Start 2P", cursive' }}
                 >
                   View on GitHub
@@ -109,7 +131,7 @@ function App() {
               </div>
             )}
             {activeProject === "rail-interlock" && (
-              <div className="mb-4 space-y-3 text-[8px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <div className="mb-4 space-y-3 text-[10px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
                 <p>
                   SAFETY CRITICAL C INTERLOCK AND FAULT DETECTION FOR RAILWAY TRANSIT.
                 </p>
@@ -117,7 +139,7 @@ function App() {
                   href={RAIL_INTERLOCK_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[8px] uppercase text-amber-400 hover:bg-amber-500/20"
+                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[10px] uppercase text-amber-400 hover:bg-amber-500/20"
                   style={{ fontFamily: '"Press Start 2P", cursive' }}
                 >
                   View on GitHub
@@ -125,7 +147,7 @@ function App() {
               </div>
             )}
             {activeProject === "warehouse-robot" && (
-              <div className="mb-4 space-y-3 text-[8px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <div className="mb-4 space-y-3 text-[10px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
                 <p>
                   WAREHOUSE ROBOT SIMULATOR WITH MAP, LIDAR, PATH PLANNING, AND LOCAL AVOIDANCE.
                 </p>
@@ -133,7 +155,7 @@ function App() {
                   href={WAREHOUSE_ROBOT_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[8px] uppercase text-amber-400 hover:bg-amber-500/20"
+                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[10px] uppercase text-amber-400 hover:bg-amber-500/20"
                   style={{ fontFamily: '"Press Start 2P", cursive' }}
                 >
                   View on GitHub
@@ -141,7 +163,7 @@ function App() {
               </div>
             )}
             {activeProject === "chirp" && (
-              <div className="mb-4 space-y-3 text-[8px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <div className="mb-4 space-y-3 text-[10px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
                 <p>
                   CHIRP IS A TWITTER-STYLE CLONE I BUILT TO PRACTICE FULL-STACK THINKING: AUTH, TIMELINES, AND HOW THE UI FEELS.
                 </p>
@@ -153,7 +175,7 @@ function App() {
                     href={CHIRP_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[8px] uppercase text-amber-400 hover:bg-amber-500/20"
+                    className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[10px] uppercase text-amber-400 hover:bg-amber-500/20"
                     style={{ fontFamily: '"Press Start 2P", cursive' }}
                   >
                     View live app
@@ -162,7 +184,7 @@ function App() {
               </div>
             )}
             {activeProject === "smart-supply" && (
-              <div className="mb-4 space-y-3 text-[8px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <div className="mb-4 space-y-3 text-[10px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
                 <p>
                   INVENTORY OPTIMIZATION WITH LIGHTGBM DEMAND FORECASTING ON THE WALMART M5 DATASET. CUTS WASTE AND STOCKOUTS, THEN COMPARES ML MODEL ORDERS VS A SIMPLE BASELINE.
                 </p>
@@ -173,7 +195,7 @@ function App() {
                   href={SMART_SUPPLY_GITHUB_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[8px] uppercase text-amber-400 hover:bg-amber-500/20"
+                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[10px] uppercase text-amber-400 hover:bg-amber-500/20"
                   style={{ fontFamily: '"Press Start 2P", cursive' }}
                 >
                   View on GitHub
@@ -183,7 +205,7 @@ function App() {
                     href={SMART_SUPPLY_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-2 ml-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[8px] uppercase text-amber-400 hover:bg-amber-500/20"
+                    className="mt-2 ml-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[10px] uppercase text-amber-400 hover:bg-amber-500/20"
                     style={{ fontFamily: '"Press Start 2P", cursive' }}
                   >
                     View live app
@@ -192,7 +214,7 @@ function App() {
               </div>
             )}
             {activeProject === "chess-engine" && (
-              <div className="mb-4 space-y-3 text-[8px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <div className="mb-4 space-y-3 text-[10px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
                 <p>
                   PYTHON CHESS ENGINE THAT SPEAKS UCI. BOARD (FEN, MAKE/UNMAKE), LEGAL MOVES (CASTLING, EN PASSANT), ALPHA-BETA SEARCH WITH ITERATIVE DEEPENING AND QUIESCENCE, MATERIAL + PIECE-SQUARE EVAL.
                 </p>
@@ -205,7 +227,7 @@ function App() {
               </div>
             )}
             {activeProject === "event-lottery" && (
-              <div className="mb-4 space-y-3 text-[8px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <div className="mb-4 space-y-3 text-[10px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
                 <p>
                   ANDROID EVENT LOTTERY APP (CMPUT 301 / QUANTI-AGENTS). ORGANIZERS RUN EVENTS & ENTRANTS JOIN A WAITING LIST TO GET DRAWN INTO THE LOTTERY.
                 </p>
@@ -216,7 +238,7 @@ function App() {
                   href={EVENT_LOTTERY_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[8px] uppercase text-amber-400 hover:bg-amber-500/20"
+                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[10px] uppercase text-amber-400 hover:bg-amber-500/20"
                   style={{ fontFamily: '"Press Start 2P", cursive' }}
                 >
                   View on GitHub
@@ -224,7 +246,7 @@ function App() {
               </div>
             )}
             {activeProject === "neural-network" && (
-              <div className="mb-4 space-y-3 text-[8px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <div className="mb-4 space-y-3 text-[10px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
                 <p>
                   MULTILAYER PERCEPTRON INFERENCE ENGINE IN C++ FROM SCRATCH. CUSTOM MATRIX CLASS, FORWARD PROP, RELU + SIGMOID (NO TENSORFLOW OR PYTORCH).
                 </p>
@@ -235,7 +257,7 @@ function App() {
                   href={NEURAL_NETWORK_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[8px] uppercase text-amber-400 hover:bg-amber-500/20"
+                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[10px] uppercase text-amber-400 hover:bg-amber-500/20"
                   style={{ fontFamily: '"Press Start 2P", cursive' }}
                 >
                   View on GitHub
@@ -245,7 +267,7 @@ function App() {
             <button
               type="button"
               onClick={() => setActiveProject(null)}
-              className="w-full rounded border-2 border-amber-500/80 bg-black py-3 text-[8px] uppercase text-amber-400 hover:bg-amber-500/10 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+              className="w-full rounded border-2 border-amber-500/80 bg-black py-3 text-[10px] uppercase text-amber-400 hover:bg-amber-500/10 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
               style={{ fontFamily: '"Press Start 2P", cursive' }}
             >
               Close

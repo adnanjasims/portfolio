@@ -8,7 +8,7 @@ export default function ArcadeCabinet({ children }) {
       <div className="flex w-full max-w-4xl flex-col overflow-hidden rounded-xl border-[8px] border-[#1c1c22] bg-[#12121a] shadow-[0_40px_80px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.04)]">
         {/* Top marquee strip */}
         <div className="border-b-4 border-[#2a2a32] bg-[#18181f] px-4 py-2">
-          <p className="text-center font-black uppercase tracking-[0.35em] text-amber-500/95" style={{ fontFamily: '"Press Start 2P", cursive', fontSize: "10px" }}>
+          <p className="text-center font-black uppercase tracking-[0.35em] text-amber-500/95" style={{ fontFamily: '"Press Start 2P", cursive', fontSize: "12px" }}>
             PORTFOLIO
           </p>
         </div>
@@ -48,7 +48,7 @@ export default function ArcadeCabinet({ children }) {
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-center gap-1">
               <div className="h-10 w-10 rounded-sm border-2 border-[#333340] bg-[#252530] shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]" />
-              <span className="text-[8px] uppercase tracking-widest text-slate-500" style={{ fontFamily: '"Press Start 2P", cursive' }}>P1</span>
+              <span className="text-[10px] uppercase tracking-widest text-slate-500" style={{ fontFamily: '"Press Start 2P", cursive' }}>P1</span>
             </div>
             <div className="flex flex-col gap-0.5">
               <div className="flex gap-0.5">
@@ -66,7 +66,7 @@ export default function ArcadeCabinet({ children }) {
 
           <div className="flex flex-col items-center gap-1">
             <div className="h-2 w-8 rounded-none border-2 border-[#333340] bg-[#1a1a24]" />
-            <span className="text-[6px] uppercase text-slate-500" style={{ fontFamily: '"Press Start 2P", cursive' }}>COIN</span>
+            <span className="text-[8px] uppercase text-slate-500" style={{ fontFamily: '"Press Start 2P", cursive' }}>COIN</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -84,7 +84,7 @@ export default function ArcadeCabinet({ children }) {
             </div>
             <div className="flex flex-col items-center gap-1">
               <div className="h-10 w-10 rounded-sm border-2 border-[#333340] bg-[#252530] shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]" />
-              <span className="text-[8px] uppercase tracking-widest text-slate-500" style={{ fontFamily: '"Press Start 2P", cursive' }}>P2</span>
+              <span className="text-[10px] uppercase tracking-widest text-slate-500" style={{ fontFamily: '"Press Start 2P", cursive' }}>P2</span>
             </div>
           </div>
         </div>

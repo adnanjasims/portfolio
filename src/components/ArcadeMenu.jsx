@@ -188,7 +188,7 @@ export default function ArcadeMenu({ onSelectProject, selectedProjectId = null }
     <div className="arcade-screen flex h-full w-full flex-col bg-black p-2">
       {/* Header */}
       <div className="mb-2 border-b border-white/40 pb-1">
-        <p className="text-[8px] leading-tight text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+        <p className="text-[10px] leading-tight text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
           SELECT PROJECT
         </p>
       </div>
@@ -216,22 +216,22 @@ export default function ArcadeMenu({ onSelectProject, selectedProjectId = null }
                 <Logo className="h-8 w-8" />
               </span>
               <div className="flex min-w-0 flex-1 flex-col gap-0">
-                <span className="text-[8px] leading-tight">
+                <span className="text-[10px] leading-tight">
                   {proj.label}
                 </span>
-                <span className={`text-[5px] leading-tight ${isSelected ? "text-black/70" : "text-white/60"}`}>
+                <span className={`text-[7px] leading-tight ${isSelected ? "text-black/70" : "text-white/60"}`}>
                   {proj.sublabel}
                 </span>
               </div>
               {isSelected && (
-                <span className="flex-shrink-0 text-[8px] opacity-80">&gt;</span>
+                <span className="flex-shrink-0 text-[10px] opacity-80">&gt;</span>
               )}
             </button>
           );
         })}
       </div>
 
-      <p className="mt-2 text-[5px] text-white/50" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+      <p className="mt-2 text-[7px] text-white/50" style={{ fontFamily: '"Press Start 2P", cursive' }}>
         CLICK TO OPEN
       </p>
     </div>

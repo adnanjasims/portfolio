@@ -20,7 +20,7 @@ export default function ArcadePageFrame({ children }) {
               scrollToProjects();
             }
           }}
-          className="relative cursor-pointer border-none bg-transparent p-0 text-center text-[10px] font-black uppercase tracking-[0.5em] text-amber-400/95 drop-shadow-[0_0_12px_rgba(251,191,36,0.4)] transition hover:text-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:ring-offset-2 focus:ring-offset-black"
+          className="arcade-marquee-pulse relative cursor-pointer border-none bg-transparent p-0 text-center text-[12px] font-black uppercase tracking-[0.5em] text-amber-400/95 drop-shadow-[0_0_12px_rgba(251,191,36,0.4)] transition hover:text-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:ring-offset-2 focus:ring-offset-black"
           style={{ fontFamily: '"Press Start 2P", cursive' }}
           aria-label="Press start to scroll to projects"
         >

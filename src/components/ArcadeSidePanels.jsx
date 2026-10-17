@@ -9,16 +9,16 @@ export default function ArcadeSidePanels() {
         <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "repeating-linear-gradient(90deg, transparent 0, transparent 8px, rgba(251,191,36,0.03) 8px, rgba(251,191,36,0.03) 10px)" }} />
         <div className="relative flex w-full flex-col items-center gap-6 px-3">
           <div className="w-full rounded border-2 border-amber-500/40 bg-black/80 p-3 text-center">
-            <p className="text-[6px] text-amber-400/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>INSERT</p>
-            <p className="text-[6px] text-amber-400/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>COIN</p>
+            <p className="text-[8px] text-amber-400/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>INSERT</p>
+            <p className="text-[8px] text-amber-400/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>COIN</p>
           </div>
           <div className="w-full rounded border-2 border-white/20 bg-black/60 p-3">
-            <p className="mb-2 text-[6px] text-white/60" style={{ fontFamily: '"Press Start 2P", cursive' }}>HIGH SCORES</p>
-            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>1. DOC INTEL</p>
-            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>2. RAIL INTERLOCK</p>
-            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>3. WAREHOUSE</p>
-            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>4. CHIRP</p>
-            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>5. CHESS</p>
+            <p className="mb-2 text-[8px] text-white/60" style={{ fontFamily: '"Press Start 2P", cursive' }}>HIGH SCORES</p>
+            <p className="text-[7px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>1. DOC INTEL</p>
+            <p className="text-[7px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>2. RAIL INTERLOCK</p>
+            <p className="text-[7px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>3. WAREHOUSE</p>
+            <p className="text-[7px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>4. CHIRP</p>
+            <p className="text-[7px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>5. CHESS</p>
           </div>
           <div className="flex flex-col gap-1">
             {[1, 2, 3, 4].map((i) => (
@@ -26,8 +26,8 @@ export default function ArcadeSidePanels() {
             ))}
           </div>
           <div className="w-full rounded border-2 border-red-500/30 bg-black/60 p-2 text-center">
-            <p className="text-[5px] text-red-400/80" style={{ fontFamily: '"Press Start 2P", cursive' }}>1 PLAYER</p>
-            <p className="text-[5px] text-red-400/80" style={{ fontFamily: '"Press Start 2P", cursive' }}>ONLY</p>
+            <p className="text-[7px] text-red-400/80" style={{ fontFamily: '"Press Start 2P", cursive' }}>1 PLAYER</p>
+            <p className="text-[7px] text-red-400/80" style={{ fontFamily: '"Press Start 2P", cursive' }}>ONLY</p>
           </div>
         </div>
       </aside>
@@ -37,20 +37,20 @@ export default function ArcadeSidePanels() {
         <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "repeating-linear-gradient(-90deg, transparent 0, transparent 8px, rgba(251,191,36,0.03) 8px, rgba(251,191,36,0.03) 10px)" }} />
         <div className="relative flex w-full flex-col items-center gap-6 px-3">
           <div className="w-full rounded border-2 border-amber-500/40 bg-black/80 p-3 text-center">
-            <p className="text-[6px] text-amber-400/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>CREDITS</p>
-            <p className="mt-1 text-[5px] text-white/50" style={{ fontFamily: '"Press Start 2P", cursive' }}>REACT</p>
-            <p className="text-[5px] text-white/50" style={{ fontFamily: '"Press Start 2P", cursive' }}>VITE</p>
-            <p className="text-[5px] text-white/50" style={{ fontFamily: '"Press Start 2P", cursive' }}>TAILWIND</p>
+            <p className="text-[8px] text-amber-400/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>CREDITS</p>
+            <p className="mt-1 text-[7px] text-white/50" style={{ fontFamily: '"Press Start 2P", cursive' }}>REACT</p>
+            <p className="text-[7px] text-white/50" style={{ fontFamily: '"Press Start 2P", cursive' }}>VITE</p>
+            <p className="text-[7px] text-white/50" style={{ fontFamily: '"Press Start 2P", cursive' }}>TAILWIND</p>
           </div>
           <div className="w-full rounded border-2 border-white/20 bg-black/60 p-3">
-            <p className="mb-2 text-[6px] text-white/60" style={{ fontFamily: '"Press Start 2P", cursive' }}>CONTROLS</p>
-            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>CLICK = SELECT</p>
-            <p className="text-[5px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>ESC = CLOSE</p>
+            <p className="mb-2 text-[8px] text-white/60" style={{ fontFamily: '"Press Start 2P", cursive' }}>CONTROLS</p>
+            <p className="text-[7px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>CLICK = SELECT</p>
+            <p className="text-[7px] leading-relaxed text-white/40" style={{ fontFamily: '"Press Start 2P", cursive' }}>ESC = CLOSE</p>
           </div>
           <div className="h-8 w-16 rounded border-2 border-slate-600 bg-slate-800/80" />
           <div className="w-full rounded border-2 border-emerald-500/30 bg-black/60 p-2 text-center">
-            <p className="text-[5px] text-emerald-400/80" style={{ fontFamily: '"Press Start 2P", cursive' }}>PLAY</p>
-            <p className="text-[5px] text-emerald-400/80" style={{ fontFamily: '"Press Start 2P", cursive' }}>MODE</p>
+            <p className="text-[7px] text-emerald-400/80" style={{ fontFamily: '"Press Start 2P", cursive' }}>PLAY</p>
+            <p className="text-[7px] text-emerald-400/80" style={{ fontFamily: '"Press Start 2P", cursive' }}>MODE</p>
           </div>
         </div>
       </aside>
