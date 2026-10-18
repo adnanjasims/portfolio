@@ -23,14 +23,19 @@ function App() {
   const [booting, setBooting] = useState(true);
   const [contentReady, setContentReady] = useState(false);
 
+  // content starts rising under the collapsing CRT overlay
+  const handleBootReveal = useCallback(() => {
+    requestAnimationFrame(() => setContentReady(true));
+  }, []);
+
   const handleBootDone = useCallback(() => {
     setBooting(false);
-    // wait a frame so entrance fades start from opacity 0
-    requestAnimationFrame(() => setContentReady(true));
   }, []);
 
   const enter = (delayClass = "") =>
     `arcade-enter ${delayClass} ${contentReady ? "is-ready" : ""}`.trim();
+
+  const stageClass = `arcade-stage ${contentReady ? "is-ready" : ""}`.trim();
 
   const projectLabel = (id) => {
     if (id === "doc-intel") return "Doc Intelligence, OCR for drawings";
@@ -46,66 +51,70 @@ function App() {
 
   return (
     <div className="min-h-screen w-full bg-[#060608] text-white">
-      {booting && <ArcadeBootScreen onDone={handleBootDone} />}
+      {booting && (
+        <ArcadeBootScreen onReveal={handleBootReveal} onDone={handleBootDone} />
+      )}
 
-      {/* Subtle grid background for center */}
-      <div className="fixed inset-0 z-0 opacity-[0.03]" style={{ backgroundImage: "linear-gradient(rgba(251,191,36,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(251,191,36,0.1) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+      <div className={stageClass}>
+        {/* Subtle grid background for center */}
+        <div className="fixed inset-0 z-0 opacity-[0.03]" style={{ backgroundImage: "linear-gradient(rgba(251,191,36,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(251,191,36,0.1) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
 
-      <ArcadeSidePanels />
+        <ArcadeSidePanels />
 
-      <ArcadePageFrame>
-        <div className={enter("arcade-enter-delay-1")}>
-          <ArcadeIntro />
-        </div>
+        <ArcadePageFrame>
+          <div className={enter("arcade-enter-delay-1")}>
+            <ArcadeIntro />
+          </div>
 
-        <section id="projects" className={`flex flex-col items-center justify-center py-6 ${enter("arcade-enter-delay-2")}`}>
-          <ArcadeCabinet>
-            <ArcadeMenu onSelectProject={setActiveProject} />
-          </ArcadeCabinet>
-        </section>
-
-        {(CHIRP_URL.startsWith("http") || SMART_SUPPLY_URL.startsWith("http")) && (
-          <section className={`mx-auto flex w-full max-w-2xl flex-wrap items-center justify-center gap-4 px-4 py-3 ${enter("arcade-enter-delay-3")}`}>
-            <p className="w-full text-center text-[7px] uppercase tracking-widest text-amber-500/60" style={{ fontFamily: '"Press Start 2P", cursive' }}>
-              Live apps
-            </p>
-            {CHIRP_URL.startsWith("http") && (
-              <a
-                href={CHIRP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded border-2 border-amber-500/60 bg-amber-950/40 px-4 py-2 text-[8px] uppercase text-amber-400/90 hover:bg-amber-500/20"
-                style={{ fontFamily: '"Press Start 2P", cursive' }}
-              >
-                Chirp
-              </a>
-            )}
-            {SMART_SUPPLY_URL.startsWith("http") && (
-              <a
-                href={SMART_SUPPLY_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded border-2 border-amber-500/60 bg-amber-950/40 px-4 py-2 text-[8px] uppercase text-amber-400/90 hover:bg-amber-500/20"
-                style={{ fontFamily: '"Press Start 2P", cursive' }}
-              >
-                Smart Supply
-              </a>
-            )}
+          <section id="projects" className={`flex flex-col items-center justify-center py-6 ${enter("arcade-enter-delay-2")}`}>
+            <ArcadeCabinet>
+              <ArcadeMenu onSelectProject={setActiveProject} />
+            </ArcadeCabinet>
           </section>
-        )}
 
-        <div className={enter("arcade-enter-delay-3")}>
-          <ChessEngineEmbed />
-        </div>
+          {(CHIRP_URL.startsWith("http") || SMART_SUPPLY_URL.startsWith("http")) && (
+            <section className={`mx-auto flex w-full max-w-2xl flex-wrap items-center justify-center gap-4 px-4 py-3 ${enter("arcade-enter-delay-3")}`}>
+              <p className="w-full text-center text-[7px] uppercase tracking-widest text-amber-500/60" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+                Live apps
+              </p>
+              {CHIRP_URL.startsWith("http") && (
+                <a
+                  href={CHIRP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded border-2 border-amber-500/60 bg-amber-950/40 px-4 py-2 text-[8px] uppercase text-amber-400/90 hover:bg-amber-500/20"
+                  style={{ fontFamily: '"Press Start 2P", cursive' }}
+                >
+                  Chirp
+                </a>
+              )}
+              {SMART_SUPPLY_URL.startsWith("http") && (
+                <a
+                  href={SMART_SUPPLY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded border-2 border-amber-500/60 bg-amber-950/40 px-4 py-2 text-[8px] uppercase text-amber-400/90 hover:bg-amber-500/20"
+                  style={{ fontFamily: '"Press Start 2P", cursive' }}
+                >
+                  Smart Supply
+                </a>
+              )}
+            </section>
+          )}
 
-        <div className={enter("arcade-enter-delay-4")}>
-          <ArcadeChessSection />
-        </div>
+          <div className={enter("arcade-enter-delay-3")}>
+            <ChessEngineEmbed />
+          </div>
 
-        <div className={enter("arcade-enter-delay-5")}>
-          <ArcadeFooter />
-        </div>
-      </ArcadePageFrame>
+          <div className={enter("arcade-enter-delay-4")}>
+            <ArcadeChessSection />
+          </div>
+
+          <div className={enter("arcade-enter-delay-5")}>
+            <ArcadeFooter />
+          </div>
+        </ArcadePageFrame>
+      </div>
 
       {/* Project modal (arcade style) */}
       {activeProject && (

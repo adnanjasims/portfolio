@@ -10,21 +10,23 @@ const BOOT_LINES = [
 
 const FILL_MS = 5500;
 const HOLD_MS = 1500;
-const FADE_MS = 700;
+const DISSOLVE_MS = 500;
+const COLLAPSE_MS = 900;
 const TICK_MS = 50;
 const LINE_INTERVAL_MS = 900;
 
 /** One-shot boot overlay before the portfolio shows. */
-export default function ArcadeBootScreen({ onDone }) {
+export default function ArcadeBootScreen({ onReveal, onDone }) {
   const [progress, setProgress] = useState(0);
   const [lineCount, setLineCount] = useState(0);
-  const [phase, setPhase] = useState("boot"); // boot | fade | done
+  const [phase, setPhase] = useState("boot"); // boot | dissolve | collapse | done
 
   useEffect(() => {
     let progressTimer = 0;
     let lineTimer = 0;
     let holdTimer = 0;
-    let fadeTimer = 0;
+    let dissolveTimer = 0;
+    let collapseTimer = 0;
     let cancelled = false;
 
     const prefersReduced =
@@ -34,6 +36,8 @@ export default function ArcadeBootScreen({ onDone }) {
     // shorter timings when the user prefers reduced motion
     const fillMs = prefersReduced ? 2200 : FILL_MS;
     const holdMs = prefersReduced ? 600 : HOLD_MS;
+    const dissolveMs = prefersReduced ? 200 : DISSOLVE_MS;
+    const collapseMs = prefersReduced ? 350 : COLLAPSE_MS;
     const startedAt = performance.now();
 
     setProgress(0);
@@ -41,12 +45,18 @@ export default function ArcadeBootScreen({ onDone }) {
 
     const finish = () => {
       if (cancelled) return;
-      setPhase("fade");
-      fadeTimer = window.setTimeout(() => {
+      // panel text dissolves first, then CRT collapses while content reveals under
+      setPhase("dissolve");
+      dissolveTimer = window.setTimeout(() => {
         if (cancelled) return;
-        setPhase("done");
-        onDone?.();
-      }, FADE_MS);
+        setPhase("collapse");
+        onReveal?.();
+        collapseTimer = window.setTimeout(() => {
+          if (cancelled) return;
+          setPhase("done");
+          onDone?.();
+        }, collapseMs);
+      }, dissolveMs);
     };
 
     progressTimer = window.setInterval(() => {
@@ -73,22 +83,29 @@ export default function ArcadeBootScreen({ onDone }) {
       clearInterval(progressTimer);
       clearInterval(lineTimer);
       clearTimeout(holdTimer);
-      clearTimeout(fadeTimer);
+      clearTimeout(dissolveTimer);
+      clearTimeout(collapseTimer);
     };
-  }, [onDone]);
+  }, [onReveal, onDone]);
 
   if (phase === "done") return null;
 
+  const phaseClass =
+    phase === "dissolve"
+      ? "arcade-boot--dissolve"
+      : phase === "collapse"
+        ? "arcade-boot--collapse"
+        : "";
+
   return (
     <div
-      className={`arcade-boot fixed inset-0 z-50 flex items-center justify-center bg-black ${
-        phase === "fade" ? "arcade-boot--fade" : ""
-      }`}
+      className={`arcade-boot fixed inset-0 z-50 flex items-center justify-center bg-black ${phaseClass}`}
       aria-live="polite"
       aria-busy={phase === "boot"}
     >
       <div className="arcade-boot__crt pointer-events-none absolute inset-0" />
       <div className="arcade-boot__scanlines pointer-events-none absolute inset-0" />
+      <div className="arcade-boot__glow pointer-events-none absolute inset-0" />
 
       <div className="arcade-boot__panel relative z-10 w-full max-w-md px-6 text-center">
         <p className="arcade-boot__title mb-6 text-[12px] uppercase tracking-[0.35em] text-amber-400">

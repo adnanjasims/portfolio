@@ -56,10 +56,20 @@ body {
 .arcade-boot {
   font-family: "Press Start 2P", cursive;
   animation: arcade-crt-power 0.55s ease-out both;
+  overflow: hidden;
 }
-.arcade-boot--fade {
-  animation: arcade-boot-fade 0.7s ease-in forwards;
+.arcade-boot--dissolve {
   pointer-events: none;
+}
+.arcade-boot--dissolve .arcade-boot__panel {
+  animation: arcade-boot-panel-out 0.5s ease-in forwards;
+}
+.arcade-boot--collapse {
+  pointer-events: none;
+  animation: arcade-crt-collapse 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.arcade-boot--collapse .arcade-boot__panel {
+  opacity: 0;
 }
 .arcade-boot__crt {
   background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.55) 100%);
@@ -73,6 +83,17 @@ body {
     black 1px,
     black 2px
   );
+}
+.arcade-boot__glow {
+  opacity: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(251, 191, 36, 0.18) 0%,
+    transparent 55%
+  );
+}
+.arcade-boot--collapse .arcade-boot__glow {
+  animation: arcade-boot-glow-flash 0.9s ease-out both;
 }
 .arcade-boot__title {
   text-shadow: 0 0 18px rgba(251, 191, 36, 0.45);
@@ -102,10 +123,54 @@ body {
   }
 }
 
-@keyframes arcade-boot-fade {
+/* panel text soft-exits before the CRT fold */
+@keyframes arcade-boot-panel-out {
   to {
     opacity: 0;
+    filter: blur(2px);
+    transform: scale(0.98);
+  }
+}
+
+/* CRT folds to a thin line, then dissolves so content shows through */
+@keyframes arcade-crt-collapse {
+  0% {
+    opacity: 1;
+    transform: scaleY(1) scaleX(1);
+    filter: brightness(1);
+  }
+  35% {
+    opacity: 1;
+    transform: scaleY(0.035) scaleX(1);
+    filter: brightness(1.35);
+  }
+  55% {
+    opacity: 1;
+    transform: scaleY(0.02) scaleX(0.55);
+    filter: brightness(1.8);
+  }
+  75% {
+    opacity: 0.55;
+    transform: scaleY(0.01) scaleX(0.2);
+    filter: brightness(2.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(0.01) scaleX(0);
+    filter: brightness(2.5);
     visibility: hidden;
+  }
+}
+
+@keyframes arcade-boot-glow-flash {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
   }
 }
 
@@ -131,33 +196,51 @@ body {
   }
 }
 
+/* whole arcade stage wakes under the collapsing CRT
+   opacity only: filter/transform would reparent position:fixed side panels */
+.arcade-stage {
+  opacity: 0;
+}
+.arcade-stage.is-ready {
+  animation: arcade-stage-wake 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes arcade-stage-wake {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* post-boot section entrance */
 .arcade-enter {
   opacity: 0;
 }
 .arcade-enter.is-ready {
-  animation: arcade-rise-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: arcade-rise-in 0.95s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .arcade-enter-delay-1.is-ready {
-  animation-delay: 0.08s;
+  animation-delay: 0.12s;
 }
 .arcade-enter-delay-2.is-ready {
-  animation-delay: 0.18s;
-}
-.arcade-enter-delay-3.is-ready {
   animation-delay: 0.28s;
 }
+.arcade-enter-delay-3.is-ready {
+  animation-delay: 0.44s;
+}
 .arcade-enter-delay-4.is-ready {
-  animation-delay: 0.4s;
+  animation-delay: 0.6s;
 }
 .arcade-enter-delay-5.is-ready {
-  animation-delay: 0.52s;
+  animation-delay: 0.76s;
 }
 
 @keyframes arcade-rise-in {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -183,13 +266,21 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .arcade-boot,
-  .arcade-boot--fade,
+  .arcade-boot--dissolve .arcade-boot__panel,
+  .arcade-boot--collapse,
+  .arcade-boot--collapse .arcade-boot__glow,
   .arcade-boot__line,
   .arcade-boot__blink,
+  .arcade-stage.is-ready,
   .arcade-enter.is-ready,
   .arcade-marquee-pulse {
     animation: none !important;
   }
+  .arcade-boot--dissolve .arcade-boot__panel,
+  .arcade-boot--collapse {
+    opacity: 0;
+  }
+  .arcade-stage,
   .arcade-enter {
     opacity: 1;
   }
