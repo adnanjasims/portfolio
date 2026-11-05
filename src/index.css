@@ -28,6 +28,12 @@ body {
   image-rendering: crisp-edges;
 }
 
+/* Readable body copy with a terminal / CRT feel */
+.arcade-body {
+  font-family: "Space Grotesk", ui-monospace, Menlo, Monaco, Consolas, monospace;
+  letter-spacing: 0.02em;
+}
+
 /* Center content frame: subtle border and corner glow */
 .arcade-frame {
   position: relative;

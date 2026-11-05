@@ -6,6 +6,12 @@ import { useState } from "react";
 
 const PROJECTS = [
   {
+    id: "legacy-lift",
+    label: "LEGACY LIFT",
+    sublabel: "CODE MIGRATION",
+    Logo: LegacyLiftPixelLogo,
+  },
+  {
     id: "doc-intel",
     label: "DOC INTELLIGENCE",
     sublabel: "OCR + DRAWINGS",
@@ -54,6 +60,21 @@ const PROJECTS = [
     Logo: NeuralNetworkPixelLogo,
   },
 ];
+
+function LegacyLiftPixelLogo({ className = "h-8 w-8" }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} fill="currentColor" style={{ imageRendering: "pixelated" }}>
+      {/* Old block rising into a new stack */}
+      <rect x="2" y="10" width="5" height="4" />
+      <rect x="3" y="7" width="3" height="2" opacity="0.7" />
+      <rect x="9" y="3" width="5" height="3" />
+      <rect x="9" y="7" width="5" height="3" />
+      <rect x="9" y="11" width="5" height="3" />
+      <rect x="7" y="5" width="2" height="1" opacity="0.45" />
+      <rect x="7" y="9" width="2" height="1" opacity="0.45" />
+    </svg>
+  );
+}
 
 function DocIntelPixelLogo({ className = "h-8 w-8" }) {
   return (

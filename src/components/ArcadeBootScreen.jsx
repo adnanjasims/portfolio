@@ -5,15 +5,28 @@ const BOOT_LINES = [
   "GPU INIT ............... OK",
   "LOADING PORTFOLIO ...... OK",
   "CHESS ENGINE ........... READY",
-  "INSERT COIN TO CONTINUE",
+  "CABINET ONLINE",
 ];
 
-const FILL_MS = 5500;
+// total fill is 1s shorter than before; curve: fast to ~88%, lag, then snap finish
+const FILL_MS = 4500;
 const HOLD_MS = 1500;
 const DISSOLVE_MS = 500;
 const COLLAPSE_MS = 900;
-const TICK_MS = 50;
-const LINE_INTERVAL_MS = 900;
+const TICK_MS = 40;
+const LINE_INTERVAL_MS = 750;
+
+/** Maps elapsed fraction t in [0,1] to a 0-100 boot bar with a late lag. */
+function progressFromTime(t) {
+  if (t <= 0) return 0;
+  if (t >= 1) return 100;
+  // first 45% of time -> 0..88 (fast)
+  if (t < 0.45) return (t / 0.45) * 88;
+  // next 40% of time -> 88..94 (lag)
+  if (t < 0.85) return 88 + ((t - 0.45) / 0.4) * 6;
+  // last 15% of time -> 94..100 (quick)
+  return 94 + ((t - 0.85) / 0.15) * 6;
+}
 
 /** One-shot boot overlay before the portfolio shows. */
 export default function ArcadeBootScreen({ onReveal, onDone }) {
@@ -33,9 +46,8 @@ export default function ArcadeBootScreen({ onReveal, onDone }) {
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // shorter timings when the user prefers reduced motion
-    const fillMs = prefersReduced ? 2200 : FILL_MS;
-    const holdMs = prefersReduced ? 600 : HOLD_MS;
+    const fillMs = prefersReduced ? 1800 : FILL_MS;
+    const holdMs = prefersReduced ? 500 : HOLD_MS;
     const dissolveMs = prefersReduced ? 200 : DISSOLVE_MS;
     const collapseMs = prefersReduced ? 350 : COLLAPSE_MS;
     const startedAt = performance.now();
@@ -45,7 +57,6 @@ export default function ArcadeBootScreen({ onReveal, onDone }) {
 
     const finish = () => {
       if (cancelled) return;
-      // panel text dissolves first, then CRT collapses while content reveals under
       setPhase("dissolve");
       dissolveTimer = window.setTimeout(() => {
         if (cancelled) return;
@@ -62,9 +73,10 @@ export default function ArcadeBootScreen({ onReveal, onDone }) {
     progressTimer = window.setInterval(() => {
       if (cancelled) return;
       const elapsed = performance.now() - startedAt;
-      const next = Math.min(100, Math.round((elapsed / fillMs) * 100));
+      const t = Math.min(1, elapsed / fillMs);
+      const next = Math.min(100, Math.round(progressFromTime(t)));
       setProgress(next);
-      if (next >= 100) {
+      if (t >= 1) {
         clearInterval(progressTimer);
         setProgress(100);
         holdTimer = window.setTimeout(finish, holdMs);
@@ -76,7 +88,7 @@ export default function ArcadeBootScreen({ onReveal, onDone }) {
       i += 1;
       setLineCount(Math.min(i, BOOT_LINES.length));
       if (i >= BOOT_LINES.length) clearInterval(lineTimer);
-    }, prefersReduced ? 400 : LINE_INTERVAL_MS);
+    }, prefersReduced ? 320 : LINE_INTERVAL_MS);
 
     return () => {
       cancelled = true;

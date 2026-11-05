@@ -17,6 +17,7 @@ const NEURAL_NETWORK_URL = "https://github.com/adnanjasims/neural-network";
 const DOC_INTEL_URL = "https://github.com/adnanjasims/doc-intel";
 const RAIL_INTERLOCK_URL = "https://github.com/adnanjasims/rail-interlock-system";
 const WAREHOUSE_ROBOT_URL = "https://github.com/adnanjasims/warehouse-robot";
+const LEGACY_LIFT_URL = "https://github.com/adnanjasims/legacylift";
 
 function App() {
   const [activeProject, setActiveProject] = useState(null);
@@ -38,6 +39,7 @@ function App() {
   const stageClass = `arcade-stage ${contentReady ? "is-ready" : ""}`.trim();
 
   const projectLabel = (id) => {
+    if (id === "legacy-lift") return "Legacy Lift, verified code migration";
     if (id === "doc-intel") return "Doc Intelligence, OCR for drawings";
     if (id === "rail-interlock") return "Railway Interlock, C safety system";
     if (id === "warehouse-robot") return "Warehouse Robot, AMR simulator";
@@ -123,11 +125,31 @@ function App() {
             <h2 className="mb-4 border-b border-white/30 pb-2 text-[14px] text-amber-400" style={{ fontFamily: '"Press Start 2P", cursive' }}>
               {projectLabel(activeProject)}
             </h2>
-            {activeProject === "doc-intel" && (
-              <div className="mb-4 space-y-3 text-[10px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+            {activeProject === "legacy-lift" && (
+              <div className="arcade-body mb-4 space-y-3 text-[13px] leading-relaxed text-white/90">
                 <p>
-                  READS ENGINEERING PDFS AND DRAWINGS. EXTRACTS TABLES AND FIELDS, THEN CHECKS THEM AGAINST SIMPLE RULES.
+                  Migrates legacy code in a series of incremental steps. It pins behavior with characterization tests, applies rewrites and marks a file verified once tests pass in an isolated sandbox.
                 </p>
+                <p className="text-white/55">
+                  Stack: Python, FastAPI, Fastify, React, Postgres, RabbitMQ, Docker
+                </p>
+                <a
+                  href={LEGACY_LIFT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3 py-2 text-[10px] uppercase text-amber-400 hover:bg-amber-500/20"
+                  style={{ fontFamily: '"Press Start 2P", cursive' }}
+                >
+                  View on GitHub
+                </a>
+              </div>
+            )}
+            {activeProject === "doc-intel" && (
+              <div className="arcade-body mb-4 space-y-3 text-[13px] leading-relaxed text-white/90">
+                <p>
+                  Document intelligence pipeline for engineering PDFs and drawings with extraction of tables and fields with rule checks.
+                </p>
+                <p className="text-white/55">Stack: Python, OCR, PDF parsing</p>
                 <a
                   href={DOC_INTEL_URL}
                   target="_blank"
@@ -140,10 +162,11 @@ function App() {
               </div>
             )}
             {activeProject === "rail-interlock" && (
-              <div className="mb-4 space-y-3 text-[10px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <div className="arcade-body mb-4 space-y-3 text-[13px] leading-relaxed text-white/90">
                 <p>
-                  SAFETY CRITICAL C INTERLOCK AND FAULT DETECTION FOR RAILWAY TRANSIT.
+                  Safety-critical railway interlock and fault detection logic for transit signaling.
                 </p>
+                <p className="text-white/55">Stack: C</p>
                 <a
                   href={RAIL_INTERLOCK_URL}
                   target="_blank"
@@ -156,10 +179,11 @@ function App() {
               </div>
             )}
             {activeProject === "warehouse-robot" && (
-              <div className="mb-4 space-y-3 text-[10px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <div className="arcade-body mb-4 space-y-3 text-[13px] leading-relaxed text-white/90">
                 <p>
-                  WAREHOUSE ROBOT SIMULATOR WITH MAP, LIDAR, PATH PLANNING, AND LOCAL AVOIDANCE.
+                  Autonomous mobile robot simulator with mapping, lidar sensing, path planning, and local obstacle avoidance.
                 </p>
+                <p className="text-white/55">Stack: Python, simulation, path planning</p>
                 <a
                   href={WAREHOUSE_ROBOT_URL}
                   target="_blank"
@@ -172,13 +196,11 @@ function App() {
               </div>
             )}
             {activeProject === "chirp" && (
-              <div className="mb-4 space-y-3 text-[10px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <div className="arcade-body mb-4 space-y-3 text-[13px] leading-relaxed text-white/90">
                 <p>
-                  CHIRP IS A TWITTER-STYLE CLONE I BUILT TO PRACTICE FULL-STACK THINKING: AUTH, TIMELINES, AND HOW THE UI FEELS.
+                  Full-stack social app with auth, timelines, and a Twitter-style feed UI.
                 </p>
-                <p className="text-white/60">
-                  I CAN WALK YOU THROUGH THE STACK, TRADEOFFS, AND WHAT I WOULD IMPROVE NEXT.
-                </p>
+                <p className="text-white/55">Stack: React, Flask, SQLite</p>
                 {CHIRP_URL.startsWith("http") && (
                   <a
                     href={CHIRP_URL}
@@ -193,13 +215,11 @@ function App() {
               </div>
             )}
             {activeProject === "smart-supply" && (
-              <div className="mb-4 space-y-3 text-[10px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <div className="arcade-body mb-4 space-y-3 text-[13px] leading-relaxed text-white/90">
                 <p>
-                  INVENTORY OPTIMIZATION WITH LIGHTGBM DEMAND FORECASTING ON THE WALMART M5 DATASET. CUTS WASTE AND STOCKOUTS, THEN COMPARES ML MODEL ORDERS VS A SIMPLE BASELINE.
+                  Inventory optimization using LightGBM demand forecasts on the Walmart M5 dataset. Compares model-based orders to a baseline on waste and stockouts.
                 </p>
-                <p className="text-white/60">
-                  PYTHON PIPELINE PLUS A STREAMLIT DASHBOARD FOR PROFIT, WASTE, AND ITEM-LEVEL RECS.
-                </p>
+                <p className="text-white/55">Stack: Python, LightGBM, Streamlit</p>
                 <a
                   href={SMART_SUPPLY_GITHUB_URL}
                   target="_blank"
@@ -223,26 +243,19 @@ function App() {
               </div>
             )}
             {activeProject === "chess-engine" && (
-              <div className="mb-4 space-y-3 text-[10px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <div className="arcade-body mb-4 space-y-3 text-[13px] leading-relaxed text-white/90">
                 <p>
-                  PYTHON CHESS ENGINE THAT SPEAKS UCI. BOARD (FEN, MAKE/UNMAKE), LEGAL MOVES (CASTLING, EN PASSANT), ALPHA-BETA SEARCH WITH ITERATIVE DEEPENING AND QUIESCENCE, MATERIAL + PIECE-SQUARE EVAL.
+                  UCI chess engine with legal move generation, alpha-beta search, and a browser client for strength-limited play.
                 </p>
-                <p>
-                  FASTAPI BACKEND SERVES THE ENGINE API AND A REACT WEB FRONTEND TO PLAY IN THE BROWSER AT DIFFERENT STRENGTH LEVELS.
-                </p>
-                <p className="text-white/60">
-                  RUN AS UCI ENGINE VIA PYTHON OR POINT A GUI (ARENA, LICHESS) AT IT. PERFT TESTS IN TESTS/.
-                </p>
+                <p className="text-white/55">Stack: Python, FastAPI, React, UCI</p>
               </div>
             )}
             {activeProject === "event-lottery" && (
-              <div className="mb-4 space-y-3 text-[10px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <div className="arcade-body mb-4 space-y-3 text-[13px] leading-relaxed text-white/90">
                 <p>
-                  ANDROID EVENT LOTTERY APP (CMPUT 301 / QUANTI-AGENTS). ORGANIZERS RUN EVENTS & ENTRANTS JOIN A WAITING LIST TO GET DRAWN INTO THE LOTTERY.
+                  Android event lottery app (CMPUT 301). Organizers host events and entrants join a waiting list and get drawn in.
                 </p>
-                <p className="text-white/60">
-                  BUILT AS A TEAM ANDROID PROJECT WITH USER STORIES, UI MOCKS, AND CRC-DRIVEN DESIGN.
-                </p>
+                <p className="text-white/55">Stack: Android, Java</p>
                 <a
                   href={EVENT_LOTTERY_URL}
                   target="_blank"
@@ -255,13 +268,11 @@ function App() {
               </div>
             )}
             {activeProject === "neural-network" && (
-              <div className="mb-4 space-y-3 text-[10px] leading-relaxed text-white/90" style={{ fontFamily: '"Press Start 2P", cursive' }}>
+              <div className="arcade-body mb-4 space-y-3 text-[13px] leading-relaxed text-white/90">
                 <p>
-                  MULTILAYER PERCEPTRON INFERENCE ENGINE IN C++ FROM SCRATCH. CUSTOM MATRIX CLASS, FORWARD PROP, RELU + SIGMOID (NO TENSORFLOW OR PYTORCH).
+                  Multilayer perceptron inference engine written from scratch, including a custom matrix class and forward propagation.
                 </p>
-                <p className="text-white/60">
-                  BUILT TO SHOW THE LINEAR ALGEBRA AND MEMORY SIDE OF INFERENCE. COMPILE WITH G++ AND RUN.
-                </p>
+                <p className="text-white/55">Stack: C++, ReLU, sigmoid</p>
                 <a
                   href={NEURAL_NETWORK_URL}
                   target="_blank"
