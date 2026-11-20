@@ -177,6 +177,7 @@ export default function ArcadeMenu({
   onChangeSelection,
   onMoveSelection,
 }) {
+  const listRef = useRef(null);
   const rowRefs = useRef({});
   const hasMountedRef = useRef(false);
 
@@ -185,9 +186,16 @@ export default function ArcadeMenu({
       hasMountedRef.current = true;
       return;
     }
+    const list = listRef.current;
     const el = rowRefs.current[selectedProjectId];
-    if (el && typeof el.scrollIntoView === "function") {
-      el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    if (list && el) {
+      const elTop = el.offsetTop - list.offsetTop;
+      const elBottom = elTop + el.offsetHeight;
+      if (elTop < list.scrollTop) {
+        list.scrollTo({ top: elTop, behavior: "smooth" });
+      } else if (elBottom > list.scrollTop + list.clientHeight) {
+        list.scrollTo({ top: elBottom - list.clientHeight, behavior: "smooth" });
+      }
     }
   }, [selectedProjectId]);
 
@@ -223,7 +231,7 @@ export default function ArcadeMenu({
       </div>
 
       {/* Vertical list */}
-      <div className="flex flex-1 flex-col gap-0 overflow-y-auto">
+      <div ref={listRef} className="flex flex-1 flex-col gap-0 overflow-y-auto">
         {PROJECTS.map((proj) => {
           const isSelected = selectedProjectId === proj.id;
           const Logo = LOGO_MAP[proj.id] || LegacyLiftPixelLogo;

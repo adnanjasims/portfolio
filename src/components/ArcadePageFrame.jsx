@@ -5,11 +5,55 @@ import { GITHUB_URL, LINKEDIN_URL } from "../social";
 
 const PIXEL_FONT = { fontFamily: '"Press Start 2P", cursive' };
 
+function RetroSfxLogo({ enabled }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      className={`h-5 w-5 ${enabled ? "sfx-icon-on" : ""}`}
+      shapeRendering="crispEdges"
+      aria-hidden="true"
+      style={{ imageRendering: "pixelated" }}
+    >
+      {/* Retro pixel speaker body */}
+      <rect x="2" y="6" width="3" height="4" fill="currentColor" />
+      <rect x="5" y="4" width="2" height="8" fill="currentColor" />
+      <rect x="7" y="2" width="2" height="12" fill="currentColor" />
+
+      {enabled ? (
+        <>
+          {/* Stepped pixel sound waves when ON */}
+          <rect x="10" y="6" width="1" height="4" fill="#34d399" />
+          <rect x="12" y="4" width="1" height="2" fill="#34d399" className="sfx-wave-pulse" />
+          <rect x="13" y="6" width="1" height="4" fill="#34d399" className="sfx-wave-pulse" />
+          <rect x="12" y="10" width="1" height="2" fill="#34d399" className="sfx-wave-pulse" />
+        </>
+      ) : (
+        <>
+          {/* Pixelated dark backing + red diagonal strike-through when OFF */}
+          <rect x="2" y="1" width="2" height="2" fill="#060608" />
+          <rect x="4" y="3" width="2" height="2" fill="#060608" />
+          <rect x="6" y="5" width="2" height="2" fill="#060608" />
+          <rect x="8" y="7" width="2" height="2" fill="#060608" />
+          <rect x="10" y="9" width="2" height="2" fill="#060608" />
+          <rect x="12" y="11" width="2" height="2" fill="#060608" />
+
+          <rect x="1" y="2" width="2" height="2" fill="#ef4444" />
+          <rect x="3" y="4" width="2" height="2" fill="#ef4444" />
+          <rect x="5" y="6" width="2" height="2" fill="#ef4444" />
+          <rect x="7" y="8" width="2" height="2" fill="#ef4444" />
+          <rect x="9" y="10" width="2" height="2" fill="#ef4444" />
+          <rect x="11" y="12" width="2" height="2" fill="#ef4444" />
+          <rect x="13" y="13" width="2" height="2" fill="#ef4444" />
+        </>
+      )}
+    </svg>
+  );
+}
+
 export default function ArcadePageFrame({
   children,
   sfxEnabled = false,
   onToggleSfx,
-  onOpenTerminal,
   overclockUnlocked = false,
   overclock = false,
   onToggleOverclock,
@@ -78,26 +122,17 @@ export default function ArcadePageFrame({
           )}
           <button
             type="button"
-            onClick={() => onOpenTerminal?.()}
-            className="cursor-pointer rounded border border-emerald-500/60 bg-emerald-950/50 px-2.5 py-1 text-[8px] uppercase tracking-wider text-emerald-300 transition hover:border-emerald-300 hover:bg-emerald-900/50 focus:outline-none focus:ring-1 focus:ring-emerald-400 sm:text-[9px]"
-            style={PIXEL_FONT}
-            title="Open Portfolio Terminal (~)"
-          >
-            TERM
-          </button>
-          <button
-            type="button"
             onClick={() => onToggleSfx?.()}
             aria-pressed={sfxEnabled}
-            className={`cursor-pointer rounded border px-2.5 py-1 text-[8px] uppercase tracking-wider transition focus:outline-none focus:ring-1 focus:ring-amber-400 sm:text-[9px] ${
+            aria-label={sfxEnabled ? "Mute 8-bit sound effects" : "Enable 8-bit sound effects"}
+            className={`cursor-pointer rounded border-2 p-1.5 transition focus:outline-none focus:ring-1 focus:ring-amber-400 ${
               sfxEnabled
                 ? "border-emerald-400/80 bg-emerald-950/60 text-emerald-300 hover:bg-emerald-900/60"
-                : "border-white/25 bg-black/60 text-white/60 hover:border-amber-400/70 hover:text-amber-300"
+                : "border-white/25 bg-black/60 text-white/65 hover:border-red-400/70 hover:text-white/90"
             }`}
-            style={PIXEL_FONT}
-            title="Toggle 8-bit sound effects"
+            title={sfxEnabled ? "SFX ON (click to mute)" : "SFX OFF (click to unmute)"}
           >
-            SFX: {sfxEnabled ? "ON" : "OFF"}
+            <RetroSfxLogo enabled={sfxEnabled} />
           </button>
         </div>
       </div>

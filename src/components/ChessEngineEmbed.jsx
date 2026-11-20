@@ -21,7 +21,7 @@ function PixelKnightIcon({ className = "h-7 w-7" }) {
 }
 
 export default function ChessEngineEmbed() {
-  const hasUrl = CHESS_ENGINE_URL && CHESS_ENGINE_URL.startsWith("http");
+  const hasUrl = typeof CHESS_ENGINE_URL === "string" && /^https?:\/\//i.test(CHESS_ENGINE_URL.trim());
   const [reloadSeq, setReloadSeq] = useState(0);
 
   // Wake up Render-hosted chess server silently on mount so it responds quickly when scrolled into view.
@@ -90,6 +90,7 @@ export default function ChessEngineEmbed() {
                     key={reloadSeq}
                     title="Chess engine"
                     src={CHESS_ENGINE_URL}
+                    referrerPolicy="no-referrer"
                     className="h-full w-full border-0"
                     allow="fullscreen"
                   />

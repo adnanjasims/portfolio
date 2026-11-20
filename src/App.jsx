@@ -23,6 +23,7 @@ import {
 
 const CHIRP_URL = import.meta.env.VITE_CHIRP_URL || "";
 const SMART_SUPPLY_URL = import.meta.env.VITE_SMART_SUPPLY_URL || "";
+const isSafeHttpUrl = (url) => typeof url === "string" && /^https?:\/\//i.test(url.trim());
 const PIXEL_FONT = { fontFamily: '"Press Start 2P", cursive' };
 const KONAMI_SEQUENCE = [
   "arrowup",
@@ -215,7 +216,6 @@ function App() {
         <ArcadePageFrame
           sfxEnabled={sfxEnabled}
           onToggleSfx={handleToggleSfx}
-          onOpenTerminal={handleOpenTerminal}
           overclockUnlocked={overclockUnlocked}
           overclock={overclock}
           onToggleOverclock={handleToggleOverclock}
@@ -262,7 +262,7 @@ function App() {
             </ArcadeCabinet>
           </section>
 
-          {(CHIRP_URL.startsWith("http") || SMART_SUPPLY_URL.startsWith("http")) && (
+          {(isSafeHttpUrl(CHIRP_URL) || isSafeHttpUrl(SMART_SUPPLY_URL)) && (
             <section
               className={`mx-auto flex w-full max-w-2xl flex-wrap items-center justify-center gap-4 px-4 py-3 ${enter("arcade-enter-delay-3")}`}
             >
@@ -272,7 +272,7 @@ function App() {
               >
                 Live apps
               </p>
-              {CHIRP_URL.startsWith("http") && (
+              {isSafeHttpUrl(CHIRP_URL) && (
                 <a
                   href={CHIRP_URL}
                   target="_blank"
@@ -283,7 +283,7 @@ function App() {
                   Chirp
                 </a>
               )}
-              {SMART_SUPPLY_URL.startsWith("http") && (
+              {isSafeHttpUrl(SMART_SUPPLY_URL) && (
                 <a
                   href={SMART_SUPPLY_URL}
                   target="_blank"

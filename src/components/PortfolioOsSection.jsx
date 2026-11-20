@@ -5,7 +5,9 @@ import {
   cloneDefaultVfs,
   formatCwd,
   getNode,
+  isSafeEntryName,
   loadVfs,
+  MAX_VFS_TEXT_LENGTH,
   resolvePath,
   saveVfs,
 } from "../utils/portfolioVfs";
@@ -312,7 +314,6 @@ export default function PortfolioOsSection({
   const [explorerPath, setExplorerPath] = useState(["home", "adnan"]);
   const [windows, setWindows] = useState(INITIAL_WINDOWS);
   const [iconPositions, setIconPositions] = useState(INITIAL_ICON_POSITIONS);
-  const [topZ, setTopZ] = useState(5);
   const [startMenuOpen, setStartMenuOpen] = useState(false);
   const [osSearch, setOsSearch] = useState("");
 
@@ -357,7 +358,7 @@ export default function PortfolioOsSection({
 
   const desktopRef = useRef(null);
   const termInputRef = useRef(null);
-  const termEndRef = useRef(null);
+  const termLogRef = useRef(null);
   const dragRef = useRef(null);
   const iconDragRef = useRef(null);
 
@@ -373,23 +374,24 @@ export default function PortfolioOsSection({
   }, []);
 
   useEffect(() => {
-    if (focusRequestId > 0) {
-      window.setTimeout(() => {
-        setWindows((prev) => {
-          const nextZ = topZ + 1;
-          return {
-            ...prev,
-            terminal: { ...prev.terminal, open: true, minimized: false, z: nextZ },
-          };
-        });
-        setTopZ((z) => z + 1);
-        termInputRef.current?.focus();
-      }, 60);
-    }
-  }, [focusRequestId, topZ]);
+    if (focusRequestId <= 0) return undefined;
+    const timer = window.setTimeout(() => {
+      setWindows((prev) => {
+        const highestZ = Object.values(prev).reduce((max, w) => Math.max(max, w.z), 4);
+        return {
+          ...prev,
+          terminal: { ...prev.terminal, open: true, minimized: false, z: highestZ + 1 },
+        };
+      });
+      termInputRef.current?.focus({ preventScroll: true });
+    }, 60);
+    return () => window.clearTimeout(timer);
+  }, [focusRequestId]);
 
   useEffect(() => {
-    termEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (termLogRef.current) {
+      termLogRef.current.scrollTop = termLogRef.current.scrollHeight;
+    }
   }, [lines]);
 
   // Snake game tick
@@ -508,8 +510,12 @@ export default function PortfolioOsSection({
 
       const winDrag = dragRef.current;
       if (winDrag) {
-        const maxX = box ? Math.max(40, box.width - 140) : 650;
-        const maxY = box ? Math.max(40, box.height - 80) : 340;
+        const maxX = box
+          ? Math.max(4, box.width - Math.min(winDrag.w, Math.max(120, box.width - 16)))
+          : 650;
+        const maxY = box
+          ? Math.max(4, box.height - Math.min(winDrag.h, Math.max(80, box.height - 80)) - 42)
+          : 340;
         const nextX = Math.max(4, Math.min(maxX, winDrag.origX + (e.clientX - winDrag.startX)));
         const nextY = Math.max(4, Math.min(maxY, winDrag.origY + (e.clientY - winDrag.startY)));
         setWindows((prev) => ({
@@ -548,24 +554,38 @@ export default function PortfolioOsSection({
       setPaintDrawing(false);
     };
 
+    const onCancelDrag = () => {
+      dragRef.current = null;
+      iconDragRef.current = null;
+      setPaintDrawing(false);
+    };
+
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onCancelDrag);
+    window.addEventListener("blur", onCancelDrag);
     return () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onCancelDrag);
+      window.removeEventListener("blur", onCancelDrag);
     };
   }, []);
 
-  const focusWindow = (id) => {
-    setTopZ((prevZ) => {
-      const nextZ = prevZ + 1;
-      setWindows((prev) => ({
+  const focusWindow = useCallback((id) => {
+    setWindows((prev) => {
+      const current = prev[id];
+      if (!current) return prev;
+      const highestZ = Object.values(prev).reduce((max, w) => Math.max(max, w.z), 4);
+      if (current.open && !current.minimized && current.z === highestZ && highestZ > 4) {
+        return prev;
+      }
+      return {
         ...prev,
-        [id]: { ...prev[id], open: true, minimized: false, z: nextZ },
-      }));
-      return nextZ;
+        [id]: { ...current, open: true, minimized: false, z: highestZ + 1 },
+      };
     });
-  };
+  }, []);
 
   const closeWindow = (id) => {
     playClose();
@@ -587,20 +607,28 @@ export default function PortfolioOsSection({
 
   const startDragWindow = (e, id) => {
     if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
     focusWindow(id);
     const win = windows[id];
+    if (!win) return;
     dragRef.current = {
       id,
       startX: e.clientX,
       startY: e.clientY,
       origX: win.x,
       origY: win.y,
+      w: win.w,
+      h: win.h,
     };
   };
 
   const startDragIcon = (e, id, onClick) => {
     if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
     const pos = iconPositions[id];
+    if (!pos) return;
     iconDragRef.current = {
       id,
       startX: e.clientX,
@@ -626,10 +654,14 @@ export default function PortfolioOsSection({
     if (notePath.length < 1) return;
     const parentParts = notePath.slice(0, -1);
     const fileName = notePath[notePath.length - 1];
+    if (!isSafeEntryName(fileName)) return;
     const nextVfs = JSON.parse(JSON.stringify(vfs));
     const parent = getNode(nextVfs, parentParts);
     if (!parent || parent.type !== "dir") return;
-    parent.children[fileName] = { type: "file", content: noteText };
+    parent.children[fileName] = {
+      type: "file",
+      content: noteText.slice(0, MAX_VFS_TEXT_LENGTH),
+    };
     setVfs(nextVfs);
     saveVfs(nextVfs);
     playSelect();
@@ -663,10 +695,12 @@ export default function PortfolioOsSection({
 
   const createEntryInExplorer = (kind) => {
     const clean = newEntryName.trim().replace(/[/\\]/g, "");
-    if (!clean) return;
+    if (!isSafeEntryName(clean)) return;
     const nextVfs = JSON.parse(JSON.stringify(vfs));
     const dir = getNode(nextVfs, explorerPath);
-    if (!dir || dir.type !== "dir" || dir.children[clean]) return;
+    if (!dir || dir.type !== "dir" || Object.prototype.hasOwnProperty.call(dir.children, clean)) {
+      return;
+    }
 
     dir.children[clean] =
       kind === "dir"
@@ -687,10 +721,13 @@ export default function PortfolioOsSection({
   };
 
   const deleteEntryInExplorer = (name) => {
+    if (!isSafeEntryName(name)) return;
     if (explorerPath.length <= 2 && ["README.txt", "projects"].includes(name)) return;
     const nextVfs = JSON.parse(JSON.stringify(vfs));
     const dir = getNode(nextVfs, explorerPath);
-    if (!dir || dir.type !== "dir" || !dir.children[name]) return;
+    if (!dir || dir.type !== "dir" || !Object.prototype.hasOwnProperty.call(dir.children, name)) {
+      return;
+    }
     delete dir.children[name];
     setVfs(nextVfs);
     saveVfs(nextVfs);
@@ -698,7 +735,7 @@ export default function PortfolioOsSection({
   };
 
   const appendLines = (entries) => {
-    setLines((prev) => [...prev, ...entries]);
+    setLines((prev) => [...prev, ...entries].slice(-250));
   };
 
   const runCommand = (rawInput) => {
@@ -731,6 +768,13 @@ export default function PortfolioOsSection({
       }
       const parentParts = targetParts.slice(0, -1);
       const fileName = targetParts[targetParts.length - 1];
+      if (!isSafeEntryName(fileName)) {
+        appendLines([
+          { type: "prompt", text: promptStr },
+          { type: "error", text: `Invalid filename: ${fileName}` },
+        ]);
+        return;
+      }
       const nextVfs = JSON.parse(JSON.stringify(vfs));
       const parent = getNode(nextVfs, parentParts);
       if (!parent || parent.type !== "dir") {
@@ -740,20 +784,24 @@ export default function PortfolioOsSection({
         ]);
         return;
       }
-      if (parent.children[fileName]?.type === "dir") {
+      if (
+        Object.prototype.hasOwnProperty.call(parent.children, fileName) &&
+        parent.children[fileName]?.type === "dir"
+      ) {
         appendLines([
           { type: "prompt", text: promptStr },
           { type: "error", text: `${fileName} is a directory.` },
         ]);
         return;
       }
-      parent.children[fileName] = { type: "file", content: text };
+      const bounded = text.slice(0, MAX_VFS_TEXT_LENGTH);
+      parent.children[fileName] = { type: "file", content: bounded };
       setVfs(nextVfs);
       saveVfs(nextVfs);
       playSelect();
       appendLines([
         { type: "prompt", text: promptStr },
-        { type: "accent", text: `Wrote ${text.length} bytes to ${fileName}.` },
+        { type: "accent", text: `Wrote ${bounded.length} bytes to ${fileName}.` },
       ]);
       return;
     }
@@ -951,10 +999,14 @@ export default function PortfolioOsSection({
         const targetParts = resolvePath(cwd, args[0]);
         const parentParts = targetParts.slice(0, -1);
         const dirName = targetParts[targetParts.length - 1];
+        if (!isSafeEntryName(dirName)) {
+          out.push({ type: "error", text: `mkdir: invalid directory name '${dirName || ""}'` });
+          break;
+        }
         const nextVfs = JSON.parse(JSON.stringify(vfs));
         const parent = getNode(nextVfs, parentParts);
         if (!parent || parent.type !== "dir") out.push({ type: "error", text: "Parent directory not found." });
-        else if (parent.children[dirName]) out.push({ type: "error", text: `mkdir: ${dirName}: Already exists` });
+        else if (Object.prototype.hasOwnProperty.call(parent.children, dirName)) out.push({ type: "error", text: `mkdir: ${dirName}: Already exists` });
         else {
           parent.children[dirName] = { type: "dir", children: {} };
           setVfs(nextVfs);
@@ -971,10 +1023,14 @@ export default function PortfolioOsSection({
         const targetParts = resolvePath(cwd, args[0]);
         const parentParts = targetParts.slice(0, -1);
         const fileName = targetParts[targetParts.length - 1];
+        if (!isSafeEntryName(fileName)) {
+          out.push({ type: "error", text: `touch: invalid filename '${fileName || ""}'` });
+          break;
+        }
         const nextVfs = JSON.parse(JSON.stringify(vfs));
         const parent = getNode(nextVfs, parentParts);
         if (!parent || parent.type !== "dir") out.push({ type: "error", text: "Parent directory not found." });
-        else if (!parent.children[fileName]) {
+        else if (!Object.prototype.hasOwnProperty.call(parent.children, fileName)) {
           parent.children[fileName] = { type: "file", content: "" };
           setVfs(nextVfs);
           saveVfs(nextVfs);
@@ -992,11 +1048,18 @@ export default function PortfolioOsSection({
         const targetParts = resolvePath(cwd, args[0]);
         const parentParts = targetParts.slice(0, -1);
         const fileName = targetParts[targetParts.length - 1];
-        const content = args.slice(1).join(" ");
+        if (!isSafeEntryName(fileName)) {
+          out.push({ type: "error", text: `write: invalid filename '${fileName || ""}'` });
+          break;
+        }
+        const content = args.slice(1).join(" ").slice(0, MAX_VFS_TEXT_LENGTH);
         const nextVfs = JSON.parse(JSON.stringify(vfs));
         const parent = getNode(nextVfs, parentParts);
         if (!parent || parent.type !== "dir") out.push({ type: "error", text: "Parent directory not found." });
-        else if (parent.children[fileName]?.type === "dir") out.push({ type: "error", text: `${fileName} is a directory.` });
+        else if (
+          Object.prototype.hasOwnProperty.call(parent.children, fileName) &&
+          parent.children[fileName]?.type === "dir"
+        ) out.push({ type: "error", text: `${fileName} is a directory.` });
         else {
           parent.children[fileName] = { type: "file", content };
           setVfs(nextVfs);
@@ -1021,9 +1084,13 @@ export default function PortfolioOsSection({
         }
         const parentParts = targetParts.slice(0, -1);
         const targetName = targetParts[targetParts.length - 1];
+        if (!isSafeEntryName(targetName)) {
+          out.push({ type: "error", text: `rm: ${args[0]}: Invalid target` });
+          break;
+        }
         const nextVfs = JSON.parse(JSON.stringify(vfs));
         const parent = getNode(nextVfs, parentParts);
-        if (!parent || !parent.children[targetName]) out.push({ type: "error", text: `rm: ${args[0]}: Not found` });
+        if (!parent || !Object.prototype.hasOwnProperty.call(parent.children, targetName)) out.push({ type: "error", text: `rm: ${args[0]}: Not found` });
         else {
           delete parent.children[targetName];
           setVfs(nextVfs);
@@ -1228,6 +1295,7 @@ export default function PortfolioOsSection({
       return (
         <>
           <div
+            ref={termLogRef}
             onClick={() => termInputRef.current?.focus()}
             className="arcade-body flex-1 space-y-1 overflow-y-auto p-3 text-[12px] leading-relaxed"
           >
@@ -1249,7 +1317,6 @@ export default function PortfolioOsSection({
                 {entry.text}
               </pre>
             ))}
-            <div ref={termEndRef} />
           </div>
           <div className="arcade-body flex items-center gap-2 border-t border-emerald-500/30 bg-black/80 px-3 py-2 text-[12px]">
             <span className="shrink-0 font-semibold text-emerald-400">
@@ -1598,7 +1665,7 @@ export default function PortfolioOsSection({
   const renderWindowHeaderActions = (win) => {
     const style = WINDOW_STYLES[win.id];
     return (
-      <div className="flex gap-1.5">
+      <div className="flex gap-1.5" onPointerDown={(e) => e.stopPropagation()}>
         {win.id === "notepad" && (
           <button
             type="button"
@@ -1767,7 +1834,7 @@ export default function PortfolioOsSection({
                 return (
                   <div
                     key={win.id}
-                    onMouseDown={() => focusWindow(win.id)}
+                    onPointerDown={() => focusWindow(win.id)}
                     style={{
                       left: win.x,
                       top: win.y,

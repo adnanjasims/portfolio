@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const PIXEL_FONT = { fontFamily: '"Press Start 2P", cursive' };
 
@@ -18,18 +18,29 @@ export default function ArcadeCabinet({
 }) {
   const [stickDir, setStickDir] = useState(""); // up | down | left | right | ""
   const [coinFlash, setCoinFlash] = useState(false);
+  const stickTimerRef = useRef(null);
+  const coinTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (stickTimerRef.current) window.clearTimeout(stickTimerRef.current);
+      if (coinTimerRef.current) window.clearTimeout(coinTimerRef.current);
+    };
+  }, []);
 
   const pulseStick = (dir, keyName, moveDelta = 0) => {
     setStickDir(dir);
     if (moveDelta !== 0) onMoveSelection?.(moveDelta);
     onArcadeInput?.(keyName);
-    window.setTimeout(() => setStickDir(""), 140);
+    if (stickTimerRef.current) window.clearTimeout(stickTimerRef.current);
+    stickTimerRef.current = window.setTimeout(() => setStickDir(""), 140);
   };
 
   const handleCoin = () => {
     setCoinFlash(true);
     onInsertCoin?.();
-    window.setTimeout(() => setCoinFlash(false), 450);
+    if (coinTimerRef.current) window.clearTimeout(coinTimerRef.current);
+    coinTimerRef.current = window.setTimeout(() => setCoinFlash(false), 450);
   };
 
   const stickOffsetClass =

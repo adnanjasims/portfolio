@@ -54,6 +54,54 @@ export const DEFAULT_VFS = {
   },
 };
 
+export const MAX_VFS_TEXT_LENGTH = 32768;
+const BLOCKED_SEGMENTS = new Set(["__proto__", "constructor", "prototype", ".", ".."]);
+
+export function isSafeEntryName(name) {
+  if (typeof name !== "string") return false;
+  const trimmed = name.trim();
+  if (!trimmed || trimmed.length > 64) return false;
+  if (BLOCKED_SEGMENTS.has(trimmed)) return false;
+  if (
+    trimmed.includes("/") ||
+    trimmed.includes("\\") ||
+    [...trimmed].some((ch) => ch.charCodeAt(0) < 32)
+  ) {
+    return false;
+  }
+  return true;
+}
+
+function sanitizeVfsNode(node, depth = 0) {
+  if (!node || typeof node !== "object" || depth > 24) return null;
+  if (node.type === "file") {
+    const raw = typeof node.content === "string" ? node.content : "";
+    return {
+      type: "file",
+      content: raw.slice(0, MAX_VFS_TEXT_LENGTH),
+    };
+  }
+  if (node.type === "dir") {
+    const safeChildren = {};
+    const children = node.children;
+    if (children && typeof children === "object" && !Array.isArray(children)) {
+      for (const key of Object.keys(children)) {
+        if (!Object.prototype.hasOwnProperty.call(children, key)) continue;
+        if (!isSafeEntryName(key)) continue;
+        const cleanChild = sanitizeVfsNode(children[key], depth + 1);
+        if (cleanChild) {
+          safeChildren[key] = cleanChild;
+        }
+      }
+    }
+    return {
+      type: "dir",
+      children: safeChildren,
+    };
+  }
+  return null;
+}
+
 export function cloneDefaultVfs() {
   return JSON.parse(JSON.stringify(DEFAULT_VFS));
 }
@@ -61,9 +109,15 @@ export function cloneDefaultVfs() {
 export function loadVfs() {
   try {
     const raw = window.localStorage.getItem(VFS_STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const sanitized = sanitizeVfsNode(parsed);
+      if (sanitized && getNode(sanitized, ["home", "adnan"])?.type === "dir") {
+        return sanitized;
+      }
+    }
   } catch {
-    // ignore storage errors
+    // ignore storage or parse errors and restore default filesystem
   }
   return cloneDefaultVfs();
 }
@@ -99,7 +153,15 @@ export function resolvePath(cwdParts, rawTarget) {
 export function getNode(root, pathParts) {
   let curr = root;
   for (const seg of pathParts) {
-    if (!curr || curr.type !== "dir" || !curr.children[seg]) return null;
+    if (!isSafeEntryName(seg)) return null;
+    if (
+      !curr ||
+      curr.type !== "dir" ||
+      !curr.children ||
+      !Object.prototype.hasOwnProperty.call(curr.children, seg)
+    ) {
+      return null;
+    }
     curr = curr.children[seg];
   }
   return curr;

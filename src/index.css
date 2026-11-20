@@ -376,6 +376,34 @@ body {
   animation: skill-driver-nudge 0.9s steps(3, end) 0.3s infinite;
 }
 
+@keyframes sfx-retro-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes sfx-wave-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.sfx-icon-on {
+  animation: sfx-retro-bounce 0.7s steps(2, end) infinite;
+}
+
+.sfx-wave-pulse {
+  animation: sfx-wave-blink 0.7s steps(2, end) infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .arcade-boot,
   .arcade-boot--dissolve .arcade-boot__panel,
@@ -387,7 +415,9 @@ body {
   .arcade-enter.is-ready,
   .arcade-marquee-pulse,
   .arcade-starfield-slow,
-  .arcade-starfield-med {
+  .arcade-starfield-med,
+  .sfx-icon-on,
+  .sfx-wave-pulse {
     animation: none !important;
   }
   .arcade-boot--dissolve .arcade-boot__panel,
