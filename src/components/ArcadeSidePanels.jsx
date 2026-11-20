@@ -51,6 +51,40 @@ export default function ArcadeSidePanels({
 
   return (
     <>
+      {/* Mobile quick-jump & status bar (< md) */}
+      <nav
+        aria-label="Mobile section navigation"
+        className="arcade-screen sticky top-0 z-20 flex items-center gap-1.5 overflow-x-auto border-b-2 border-amber-500/35 bg-[#08080c]/95 px-2.5 py-2 md:hidden"
+      >
+        {NAV_ITEMS.map((item) => {
+          const isActive = activeSection === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onJumpSection?.(item.id)}
+              className={`shrink-0 cursor-pointer rounded border px-2 py-1 text-[7px] uppercase transition focus:outline-none ${
+                isActive
+                  ? "border-amber-300 bg-amber-400 text-black"
+                  : "border-white/20 bg-black/70 text-white/75 hover:border-amber-400/60 hover:text-amber-300"
+              }`}
+              style={PIXEL_FONT}
+            >
+              {item.label}
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => onInsertCoin?.()}
+          className="ml-auto shrink-0 cursor-pointer rounded border border-emerald-500/50 bg-emerald-950/60 px-2 py-1 text-[7px] tabular-nums text-emerald-300"
+          style={PIXEL_FONT}
+          title="Insert coin"
+        >
+          CRD {String(credits).padStart(2, "0")}
+        </button>
+      </nav>
+
       <aside className="arcade-screen fixed left-0 top-0 z-10 hidden h-full w-[200px] flex-shrink-0 flex-col items-center overflow-y-auto border-r-4 border-amber-500/30 bg-[#08080c]/65 py-6 md:flex lg:w-[240px]">
         <div
           className="pointer-events-none absolute inset-0 opacity-30"

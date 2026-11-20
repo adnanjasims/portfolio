@@ -19,7 +19,7 @@ export const DEFAULT_VFS = {
             "education.txt": {
               type: "file",
               content:
-                "University of Alberta — B.S. Computer Science (Sep 2022 - Dec 2026)\nGPA: 3.6 · Faculty of Science Dean's Honor Roll",
+                "University of Alberta, B.S. Computer Science (Sep 2022 - Dec 2026)\nGPA: 3.6 · Faculty of Science Dean's Honor Roll",
             },
             "experience.txt": {
               type: "file",

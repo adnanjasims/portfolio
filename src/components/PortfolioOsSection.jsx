@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PROJECTS } from "../data/projects";
-import { playClose, playMove, playSelect } from "../utils/arcadeSfx";
+import { playClose, playCoin, playMove, playSelect } from "../utils/arcadeSfx";
 import {
   cloneDefaultVfs,
   formatCwd,
@@ -40,6 +40,7 @@ const ALL_COMMANDS = [
   "notebad",
   "notepad",
   "paint",
+  "snake",
   "files",
   "coin",
   "overclock",
@@ -71,10 +72,49 @@ const PAINT_COLORS = [
 const PAINT_COLS = 20;
 const PAINT_ROWS = 12;
 
+const SNAKE_COLS = 16;
+const SNAKE_ROWS = 10;
+const SNAKE_BEST_KEY = "portfolio_os_snake_best";
+const INITIAL_SNAKE = [
+  { x: 5, y: 5 },
+  { x: 4, y: 5 },
+  { x: 3, y: 5 },
+];
+
 function createBlankGrid() {
   return Array.from({ length: PAINT_ROWS }, () =>
     Array.from({ length: PAINT_COLS }, () => "#040a07")
   );
+}
+
+function loadSnakeBest() {
+  try {
+    const raw = window.localStorage.getItem(SNAKE_BEST_KEY);
+    return raw ? Math.max(0, parseInt(raw, 10) || 0) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function saveSnakeBest(score) {
+  try {
+    window.localStorage.setItem(SNAKE_BEST_KEY, String(score));
+  } catch {
+    // ignore storage errors
+  }
+}
+
+function randomFood(occupied) {
+  const open = [];
+  for (let y = 0; y < SNAKE_ROWS; y += 1) {
+    for (let x = 0; x < SNAKE_COLS; x += 1) {
+      if (!occupied.some((seg) => seg.x === x && seg.y === y)) {
+        open.push({ x, y });
+      }
+    }
+  }
+  if (open.length === 0) return { x: 0, y: 0 };
+  return open[Math.floor(Math.random() * open.length)];
 }
 
 function TinyOsLogo({ className = "h-5 w-5" }) {
@@ -151,6 +191,19 @@ function PixelNoteBadIcon({ className = "h-6 w-6" }) {
   );
 }
 
+function PixelSnakeIcon({ className = "h-6 w-6" }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} style={{ imageRendering: "pixelated" }}>
+      <rect x="2" y="3" width="6" height="2" fill="#10b981" />
+      <rect x="6" y="5" width="2" height="5" fill="#34d399" />
+      <rect x="6" y="8" width="6" height="2" fill="#34d399" />
+      <rect x="10" y="6" width="3" height="3" fill="#a7f3d0" />
+      <rect x="12" y="7" width="1" height="1" fill="#060608" />
+      <rect x="3" y="11" width="2" height="2" fill="#fbbf24" />
+    </svg>
+  );
+}
+
 function PixelChipIcon({ className = "h-6 w-6" }) {
   return (
     <svg viewBox="0 0 16 16" className={className} fill="currentColor" style={{ imageRendering: "pixelated" }}>
@@ -185,6 +238,7 @@ const INITIAL_WINDOWS = {
   files: { id: "files", title: "FILES", open: true, minimized: false, x: 660, y: 24, w: 235, h: 255, z: 2 },
   notepad: { id: "notepad", title: "NOTEBAD", open: false, minimized: false, x: 210, y: 48, w: 430, h: 300, z: 4 },
   paint: { id: "paint", title: "PAINT", open: false, minimized: false, x: 240, y: 42, w: 430, h: 325, z: 4 },
+  snake: { id: "snake", title: "SNAKE.EXE", open: false, minimized: false, x: 260, y: 36, w: 390, h: 330, z: 4 },
   sysinfo: { id: "sysinfo", title: "SYSINFO", open: false, minimized: false, x: 290, y: 74, w: 360, h: 240, z: 4 },
 };
 
@@ -194,8 +248,54 @@ const INITIAL_ICON_POSITIONS = {
   readme: { x: 14, y: 146 },
   notebad: { x: 14, y: 212 },
   paint: { x: 14, y: 278 },
-  projects: { x: 14, y: 344 },
-  sysinfo: { x: 76, y: 14 },
+  snake: { x: 14, y: 344 },
+  projects: { x: 76, y: 14 },
+  sysinfo: { x: 76, y: 80 },
+};
+
+const WINDOW_STYLES = {
+  terminal: {
+    border: "border-emerald-500/75",
+    bg: "bg-[#040a08]/95",
+    bar: "border-emerald-500/40 bg-[#0a1c14]",
+    title: "text-emerald-300",
+    btn: "border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20",
+  },
+  files: {
+    border: "border-amber-500/70",
+    bg: "bg-[#0b0a08]/95",
+    bar: "border-amber-500/40 bg-[#1a1509]",
+    title: "text-amber-300",
+    btn: "border-amber-500/40 text-amber-300 hover:bg-amber-500/20",
+  },
+  notepad: {
+    border: "border-amber-400/75",
+    bg: "bg-[#08090c]/95",
+    bar: "border-amber-400/40 bg-[#18160c]",
+    title: "text-amber-300",
+    btn: "border-amber-400/40 text-amber-300 hover:bg-amber-500/20",
+  },
+  paint: {
+    border: "border-pink-400/80",
+    bg: "bg-[#0b070e]/95",
+    bar: "border-pink-400/40 bg-[#1b1022]",
+    title: "text-pink-300",
+    btn: "border-pink-400/40 text-pink-300 hover:bg-pink-500/20",
+  },
+  snake: {
+    border: "border-emerald-400/85",
+    bg: "bg-[#040b07]/95",
+    bar: "border-emerald-400/40 bg-[#082015]",
+    title: "text-emerald-300",
+    btn: "border-emerald-400/40 text-emerald-300 hover:bg-emerald-500/20",
+  },
+  sysinfo: {
+    border: "border-cyan-400/75",
+    bg: "bg-[#040a0e]/95",
+    bar: "border-cyan-400/40 bg-[#081720]",
+    title: "text-cyan-300",
+    btn: "border-cyan-400/40 text-cyan-300 hover:bg-cyan-500/20",
+  },
 };
 
 export default function PortfolioOsSection({
@@ -225,7 +325,7 @@ export default function PortfolioOsSection({
     { type: "muted", text: "Files created here persist in localStorage." },
   ]);
 
-  // NoteBad parody editor state
+  // NoteBad state
   const [notePath, setNotePath] = useState(["home", "adnan", "README.txt"]);
   const [noteText, setNoteText] = useState(() => {
     const init = loadVfs();
@@ -240,6 +340,17 @@ export default function PortfolioOsSection({
   const [paintDrawing, setPaintDrawing] = useState(false);
   const [paintStatus, setPaintStatus] = useState("Ready");
 
+  // Snake state
+  const [snake, setSnake] = useState(INITIAL_SNAKE);
+  const [snakeFood, setSnakeFood] = useState({ x: 11, y: 5 });
+  const [snakeRunning, setSnakeRunning] = useState(false);
+  const [snakeOver, setSnakeOver] = useState(false);
+  const [snakeScore, setSnakeScore] = useState(0);
+  const [snakeBest, setSnakeBest] = useState(() => loadSnakeBest());
+  const snakeDirRef = useRef({ x: 1, y: 0 });
+  const snakeNextDirRef = useRef({ x: 1, y: 0 });
+  const snakeFoodRef = useRef(snakeFood);
+
   const [clockText, setClockText] = useState(() =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   );
@@ -249,6 +360,10 @@ export default function PortfolioOsSection({
   const termEndRef = useRef(null);
   const dragRef = useRef(null);
   const iconDragRef = useRef(null);
+
+  useEffect(() => {
+    snakeFoodRef.current = snakeFood;
+  }, [snakeFood]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -277,7 +392,116 @@ export default function PortfolioOsSection({
     termEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [lines]);
 
-  // Combined window + desktop-icon pointer dragging
+  // Snake game tick
+  useEffect(() => {
+    if (!snakeRunning || snakeOver || !windows.snake.open || windows.snake.minimized) {
+      return undefined;
+    }
+
+    const interval = window.setInterval(() => {
+      const nextDir = snakeNextDirRef.current;
+      snakeDirRef.current = nextDir;
+
+      setSnake((prev) => {
+        const head = prev[0];
+        const nextHead = { x: head.x + nextDir.x, y: head.y + nextDir.y };
+
+        if (
+          nextHead.x < 0 ||
+          nextHead.x >= SNAKE_COLS ||
+          nextHead.y < 0 ||
+          nextHead.y >= SNAKE_ROWS
+        ) {
+          playClose();
+          setSnakeOver(true);
+          setSnakeRunning(false);
+          return prev;
+        }
+
+        const food = snakeFoodRef.current;
+        const ateFood = nextHead.x === food.x && nextHead.y === food.y;
+        const bodyToCheck = ateFood ? prev : prev.slice(0, -1);
+
+        if (bodyToCheck.some((seg) => seg.x === nextHead.x && seg.y === nextHead.y)) {
+          playClose();
+          setSnakeOver(true);
+          setSnakeRunning(false);
+          return prev;
+        }
+
+        const nextSnake = ateFood
+          ? [nextHead, ...prev]
+          : [nextHead, ...prev.slice(0, -1)];
+
+        if (ateFood) {
+          playCoin();
+          setSnakeScore((s) => {
+            const updated = s + 10;
+            setSnakeBest((best) => {
+              if (updated > best) {
+                saveSnakeBest(updated);
+                return updated;
+              }
+              return best;
+            });
+            return updated;
+          });
+          setSnakeFood(randomFood(nextSnake));
+        }
+
+        return nextSnake;
+      });
+    }, 150);
+
+    return () => window.clearInterval(interval);
+  }, [snakeRunning, snakeOver, windows.snake.open, windows.snake.minimized]);
+
+  const queueSnakeDir = useCallback((dx, dy) => {
+    const curr = snakeDirRef.current;
+    if (curr.x === -dx && curr.y === -dy) return;
+    snakeNextDirRef.current = { x: dx, y: dy };
+  }, []);
+
+  const startOrResetSnake = useCallback((shouldRun = true) => {
+    snakeDirRef.current = { x: 1, y: 0 };
+    snakeNextDirRef.current = { x: 1, y: 0 };
+    setSnake(INITIAL_SNAKE);
+    setSnakeFood({ x: 11, y: 5 });
+    setSnakeScore(0);
+    setSnakeOver(false);
+    setSnakeRunning(shouldRun);
+    playSelect();
+  }, []);
+
+  // Keyboard controls for Snake when Snake window is open & active
+  useEffect(() => {
+    if (!windows.snake.open || windows.snake.minimized) return undefined;
+
+    const onKeyDown = (e) => {
+      const tag = e.target?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+
+      const key = e.key.toLowerCase();
+      if (key === "arrowup" || key === "w") {
+        e.preventDefault();
+        queueSnakeDir(0, -1);
+      } else if (key === "arrowdown" || key === "s") {
+        e.preventDefault();
+        queueSnakeDir(0, 1);
+      } else if (key === "arrowleft" || key === "a") {
+        e.preventDefault();
+        queueSnakeDir(-1, 0);
+      } else if (key === "arrowright" || key === "d") {
+        e.preventDefault();
+        queueSnakeDir(1, 0);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [windows.snake.open, windows.snake.minimized, queueSnakeDir]);
+
+  // Window + desktop-icon pointer dragging
   useEffect(() => {
     const onPointerMove = (e) => {
       const box = desktopRef.current?.getBoundingClientRect();
@@ -345,6 +569,7 @@ export default function PortfolioOsSection({
 
   const closeWindow = (id) => {
     playClose();
+    if (id === "snake") setSnakeRunning(false);
     setWindows((prev) => ({
       ...prev,
       [id]: { ...prev[id], open: false },
@@ -353,6 +578,7 @@ export default function PortfolioOsSection({
 
   const minimizeWindow = (id) => {
     playMove();
+    if (id === "snake") setSnakeRunning(false);
     setWindows((prev) => ({
       ...prev,
       [id]: { ...prev[id], minimized: true },
@@ -415,9 +641,7 @@ export default function PortfolioOsSection({
     const home = getNode(nextVfs, ["home", "adnan"]);
     if (!home || home.type !== "dir") return;
     const ascii = paintGrid
-      .map((row) =>
-        row.map((c) => (c === "#040a07" ? "." : "#")).join("")
-      )
+      .map((row) => row.map((c) => (c === "#040a07" ? "." : "#")).join(""))
       .join("\n");
     home.children["sketch.art"] = {
       type: "file",
@@ -543,8 +767,8 @@ export default function PortfolioOsSection({
         out.push(
           { type: "accent", text: "PORTFOLIO COMMANDS:" },
           { type: "text", text: "  skills [q] | projects | open <proj> | goto <sec> | coin | overclock" },
-          { type: "accent", text: "OS & FILE COMMANDS:" },
-          { type: "text", text: "  ls | cd | pwd | cat <file> | notebad [file] | paint | files | clear" },
+          { type: "accent", text: "OS, APPS & FILE COMMANDS:" },
+          { type: "text", text: "  ls | cd | pwd | cat <file> | notebad [file] | paint | snake | files | clear" },
           { type: "text", text: "  mkdir <dir> | touch <file> | write <file> <text> | echo \"hi\" > f | rm <name> | resetfs" }
         );
         break;
@@ -586,6 +810,12 @@ export default function PortfolioOsSection({
       case "paint": {
         focusWindow("paint");
         out.push({ type: "accent", text: "Opened Pixel Paint." });
+        break;
+      }
+      case "snake": {
+        focusWindow("snake");
+        startOrResetSnake(true);
+        out.push({ type: "accent", text: "Launched SNAKE.EXE." });
         break;
       }
       case "notebad":
@@ -875,6 +1105,7 @@ export default function PortfolioOsSection({
       { kind: "app", label: "Files", id: "files" },
       { kind: "app", label: "NoteBad", id: "notepad" },
       { kind: "app", label: "Pixel Paint", id: "paint" },
+      { kind: "app", label: "Snake.exe", id: "snake" },
       { kind: "app", label: "SysInfo", id: "sysinfo" },
     ];
     for (const a of apps) {
@@ -948,6 +1179,16 @@ export default function PortfolioOsSection({
       },
     },
     {
+      id: "snake",
+      label: "SNAKE",
+      color: "text-emerald-300 hover:bg-emerald-500/15",
+      Icon: PixelSnakeIcon,
+      onOpen: () => {
+        playSelect();
+        focusWindow("snake");
+      },
+    },
+    {
       id: "projects",
       label: "PROJECTS",
       color: "text-amber-300 hover:bg-amber-500/15",
@@ -981,6 +1222,442 @@ export default function PortfolioOsSection({
 
   const noteWordCount = noteText.trim() ? noteText.trim().split(/\s+/).length : 0;
 
+  // Shared app content renderers for both desktop windows and mobile stacked windows
+  const renderAppBody = (id) => {
+    if (id === "terminal") {
+      return (
+        <>
+          <div
+            onClick={() => termInputRef.current?.focus()}
+            className="arcade-body flex-1 space-y-1 overflow-y-auto p-3 text-[12px] leading-relaxed"
+          >
+            {lines.map((entry, idx) => (
+              <pre
+                key={idx}
+                className={`whitespace-pre-wrap break-words ${
+                  entry.type === "prompt"
+                    ? "text-amber-300"
+                    : entry.type === "accent"
+                      ? "text-emerald-300"
+                      : entry.type === "error"
+                        ? "text-rose-400"
+                        : entry.type === "muted"
+                          ? "text-white/50"
+                          : "text-white/85"
+                }`}
+              >
+                {entry.text}
+              </pre>
+            ))}
+            <div ref={termEndRef} />
+          </div>
+          <div className="arcade-body flex items-center gap-2 border-t border-emerald-500/30 bg-black/80 px-3 py-2 text-[12px]">
+            <span className="shrink-0 font-semibold text-emerald-400">
+              {formatCwd(cwd)}$
+            </span>
+            <input
+              ref={termInputRef}
+              type="text"
+              value={termInput}
+              onChange={(e) => setTermInput(e.target.value)}
+              onKeyDown={handleTermKeyDown}
+              placeholder="type `help` or `ls`..."
+              aria-label="Tiny OS terminal input"
+              className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none"
+            />
+          </div>
+        </>
+      );
+    }
+
+    if (id === "files") {
+      return (
+        <>
+          <div className="flex items-center gap-1 border-b border-white/10 bg-black/50 px-2 py-1.5">
+            {explorerPath.length > 2 && (
+              <button
+                type="button"
+                onClick={() => setExplorerPath((p) => p.slice(0, -1))}
+                className="cursor-pointer rounded border border-white/20 px-1.5 py-0.5 text-[7px] text-amber-300 hover:bg-white/10"
+                style={PIXEL_FONT}
+              >
+                ..
+              </button>
+            )}
+            <input
+              type="text"
+              value={newEntryName}
+              onChange={(e) => setNewEntryName(e.target.value)}
+              placeholder="new name..."
+              className="arcade-body min-w-0 flex-1 rounded border border-white/15 bg-black/70 px-1.5 py-0.5 text-[11px] text-white placeholder-white/30 focus:border-amber-400 focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => createEntryInExplorer("file")}
+              className="cursor-pointer rounded border border-amber-500/50 bg-amber-950/50 px-1.5 py-0.5 text-[7px] text-amber-300 hover:bg-amber-500/25"
+              style={PIXEL_FONT}
+              title="Create File"
+            >
+              +F
+            </button>
+            <button
+              type="button"
+              onClick={() => createEntryInExplorer("dir")}
+              className="cursor-pointer rounded border border-emerald-500/50 bg-emerald-950/50 px-1.5 py-0.5 text-[7px] text-emerald-300 hover:bg-emerald-500/25"
+              style={PIXEL_FONT}
+              title="Create Folder"
+            >
+              +D
+            </button>
+          </div>
+          <div className="arcade-body flex-1 space-y-1 overflow-y-auto p-2 text-[12px]">
+            {explorerItems.length === 0 ? (
+              <p className="py-4 text-center text-white/40">(empty)</p>
+            ) : (
+              explorerItems.map(([name, node]) => (
+                <div
+                  key={name}
+                  className="group flex items-center justify-between rounded px-2 py-1 hover:bg-white/10"
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (node.type === "dir") {
+                        playMove();
+                        setExplorerPath([...explorerPath, name]);
+                      } else {
+                        openFileInNoteBad([...explorerPath, name]);
+                      }
+                    }}
+                    className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left text-white/90 focus:outline-none"
+                  >
+                    {node.type === "dir" ? (
+                      <PixelFolderIcon className="h-4 w-4 shrink-0 text-amber-400" />
+                    ) : (
+                      <PixelFileIcon className="h-4 w-4 shrink-0 text-emerald-300" />
+                    )}
+                    <span className="truncate">{name}</span>
+                  </button>
+                  {!(explorerPath.length <= 2 && ["README.txt", "projects"].includes(name)) && (
+                    <button
+                      type="button"
+                      onClick={() => deleteEntryInExplorer(name)}
+                      className="cursor-pointer px-1 text-[10px] text-white/30 transition group-hover:opacity-100 hover:text-rose-400 md:opacity-0"
+                      title="Delete"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </>
+      );
+    }
+
+    if (id === "notepad") {
+      return (
+        <>
+          <div className="arcade-body flex items-center gap-3 border-b border-white/10 bg-black/60 px-3 py-1 text-[11px] text-white/70">
+            <button type="button" onClick={handleSaveNote} className="cursor-pointer hover:text-amber-300">
+              File
+            </button>
+            <button
+              type="button"
+              onClick={() => setNoteStatus("Undo is overrated")}
+              className="cursor-pointer hover:text-amber-300"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              onClick={() => setNoteStatus("Vibes: Immaculate")}
+              className="cursor-pointer hover:text-emerald-300"
+            >
+              Vibes
+            </button>
+            <button
+              type="button"
+              onClick={() => setNoteStatus("NoteBad v1.0")}
+              className="cursor-pointer hover:text-cyan-300"
+            >
+              Help
+            </button>
+          </div>
+          <textarea
+            value={noteText}
+            onChange={(e) => {
+              setNoteText(e.target.value);
+              setNoteStatus("Unsaved genius");
+            }}
+            aria-label="NoteBad text editor"
+            className="arcade-body min-h-[140px] flex-1 resize-none bg-transparent p-3 text-[12px] leading-relaxed text-white/90 focus:outline-none"
+          />
+          <div className="arcade-body flex items-center justify-between border-t border-white/10 bg-black/60 px-3 py-1 text-[11px] text-emerald-300/80">
+            <span>{formatCwd(notePath)} · {noteWordCount}w</span>
+            <span>{noteStatus}</span>
+          </div>
+        </>
+      );
+    }
+
+    if (id === "paint") {
+      return (
+        <>
+          <div className="flex items-center gap-2 border-b border-white/10 bg-black/60 px-3 py-1.5">
+            <div className="flex items-center gap-1.5">
+              {PAINT_COLORS.map((c) => (
+                <button
+                  key={c.name}
+                  type="button"
+                  onClick={() => {
+                    playMove();
+                    setPaintColor(c.hex);
+                    setPaintStatus(c.name);
+                  }}
+                  style={{ backgroundColor: c.hex }}
+                  title={c.name}
+                  className={`h-4 w-4 cursor-pointer rounded-sm border transition ${
+                    paintColor === c.hex
+                      ? "scale-125 border-white shadow-[0_0_6px_rgba(255,255,255,0.6)]"
+                      : "border-white/30"
+                  }`}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                playClose();
+                setPaintGrid(createBlankGrid());
+                setPaintStatus("Cleared");
+              }}
+              className="ml-auto cursor-pointer rounded border border-white/25 px-2 py-0.5 text-[7px] text-white/80 hover:border-pink-300 hover:text-pink-200"
+              style={PIXEL_FONT}
+            >
+              CLEAR
+            </button>
+          </div>
+          <div
+            onPointerLeave={() => setPaintDrawing(false)}
+            className="flex flex-1 items-center justify-center bg-[#040608] p-2.5"
+          >
+            <div
+              className="grid w-full max-w-[360px] select-none gap-px border border-white/15 bg-white/10 p-px"
+              style={{ gridTemplateColumns: `repeat(${PAINT_COLS}, minmax(0, 1fr))` }}
+            >
+              {paintGrid.map((row, r) =>
+                row.map((cell, c) => (
+                  <div
+                    key={`${r}-${c}`}
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      setPaintDrawing(true);
+                      paintCell(r, c);
+                    }}
+                    onPointerEnter={() => {
+                      if (paintDrawing) paintCell(r, c);
+                    }}
+                    style={{ backgroundColor: cell }}
+                    className="aspect-square w-full cursor-crosshair"
+                  />
+                ))
+              )}
+            </div>
+          </div>
+          <div className="arcade-body flex items-center justify-between border-t border-white/10 bg-black/60 px-3 py-1 text-[11px] text-pink-200/80">
+            <span>{PAINT_COLS}x{PAINT_ROWS} Canvas</span>
+            <span>{paintStatus}</span>
+          </div>
+        </>
+      );
+    }
+
+    if (id === "snake") {
+      return (
+        <>
+          <div className="flex items-center justify-between border-b border-white/10 bg-black/60 px-3 py-1.5">
+            <div className="flex gap-3 text-[8px]" style={PIXEL_FONT}>
+              <span className="text-emerald-300">SCR {snakeScore}</span>
+              <span className="text-amber-300">BEST {snakeBest}</span>
+            </div>
+            <div className="flex gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  if (snakeOver) startOrResetSnake(true);
+                  else {
+                    playSelect();
+                    setSnakeRunning((r) => !r);
+                  }
+                }}
+                className="cursor-pointer rounded border border-emerald-400/60 bg-emerald-950/60 px-2 py-0.5 text-[7px] text-emerald-200 hover:bg-emerald-800/50"
+                style={PIXEL_FONT}
+              >
+                {snakeOver ? "RETRY" : snakeRunning ? "PAUSE" : "PLAY"}
+              </button>
+              <button
+                type="button"
+                onClick={() => startOrResetSnake(false)}
+                className="cursor-pointer rounded border border-white/25 px-2 py-0.5 text-[7px] text-white/75 hover:text-white"
+                style={PIXEL_FONT}
+              >
+                RST
+              </button>
+            </div>
+          </div>
+
+          <div className="relative flex flex-1 items-center justify-center bg-[#030805] p-2">
+            <div
+              className="grid w-full max-w-[320px] gap-px border border-emerald-500/35 bg-emerald-950/30 p-px"
+              style={{ gridTemplateColumns: `repeat(${SNAKE_COLS}, minmax(0, 1fr))` }}
+            >
+              {Array.from({ length: SNAKE_ROWS }).map((_, r) =>
+                Array.from({ length: SNAKE_COLS }).map((__, c) => {
+                  const isHead = snake[0].x === c && snake[0].y === r;
+                  const isBody = !isHead && snake.some((seg) => seg.x === c && seg.y === r);
+                  const isFood = snakeFood.x === c && snakeFood.y === r;
+                  const cellClass = isHead
+                    ? "bg-emerald-200"
+                    : isBody
+                      ? "bg-emerald-500"
+                      : isFood
+                        ? "bg-amber-400"
+                        : "bg-[#040d08]";
+                  return <div key={`${r}-${c}`} className={`aspect-square w-full ${cellClass}`} />;
+                })
+              )}
+            </div>
+
+            {snakeOver && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/75">
+                <p className="text-[11px] text-rose-400" style={PIXEL_FONT}>GAME OVER</p>
+                <button
+                  type="button"
+                  onClick={() => startOrResetSnake(true)}
+                  className="mt-3 cursor-pointer rounded border-2 border-emerald-400 bg-emerald-950/80 px-3 py-1.5 text-[8px] text-emerald-200 hover:bg-emerald-800/60"
+                  style={PIXEL_FONT}
+                >
+                  PLAY AGAIN
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Touch & Mouse D-pad */}
+          <div className="flex items-center justify-between border-t border-white/10 bg-black/65 px-3 py-1.5">
+            <span className="arcade-body text-[11px] text-white/60">WASD / Arrows</span>
+            <div className="flex gap-1">
+              {[
+                { label: "◄", dx: -1, dy: 0 },
+                { label: "▲", dx: 0, dy: -1 },
+                { label: "▼", dx: 0, dy: 1 },
+                { label: "►", dx: 1, dy: 0 },
+              ].map((btn) => (
+                <button
+                  key={btn.label}
+                  type="button"
+                  onClick={() => {
+                    queueSnakeDir(btn.dx, btn.dy);
+                    if (!snakeRunning && !snakeOver) setSnakeRunning(true);
+                  }}
+                  className="cursor-pointer rounded border border-emerald-500/40 bg-emerald-950/50 px-2 py-0.5 text-[8px] text-emerald-300 hover:bg-emerald-700/40"
+                >
+                  {btn.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    // sysinfo
+    return (
+      <div className="arcade-body space-y-2 p-4 text-[12px] leading-relaxed text-white/85">
+        <div className="flex items-center gap-2">
+          <TinyOsLogo className="h-5 w-5" />
+          <span className="font-semibold text-cyan-300">TINY OS v1.0</span>
+        </div>
+        <p>Host: University of Alberta · CS</p>
+        <p>Credits: {String(credits).padStart(2, "0")}</p>
+        <p>
+          Motherboard Clock:{" "}
+          <span className={overclock ? "text-cyan-300" : "text-emerald-300"}>
+            {overclock ? "OVERCLOCK (2.8x)" : "STANDARD (1.0x)"}
+          </span>
+        </p>
+        <p className="text-white/60">
+          Konami Code: Up Up Down Down Left Right Left Right B A
+        </p>
+      </div>
+    );
+  };
+
+  const renderWindowHeaderActions = (win) => {
+    const style = WINDOW_STYLES[win.id];
+    return (
+      <div className="flex gap-1.5">
+        {win.id === "notepad" && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSaveNote();
+            }}
+            className="cursor-pointer rounded border border-emerald-400/60 bg-emerald-950/60 px-2 py-0.5 text-[7px] text-emerald-300 hover:bg-emerald-500/25"
+            style={PIXEL_FONT}
+          >
+            SAVE
+          </button>
+        )}
+        {win.id === "paint" && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSavePaintToVfs();
+            }}
+            className="cursor-pointer rounded border border-emerald-400/60 bg-emerald-950/60 px-2 py-0.5 text-[7px] text-emerald-300 hover:bg-emerald-500/25"
+            style={PIXEL_FONT}
+          >
+            SAVE
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            minimizeWindow(win.id);
+          }}
+          className={`hidden cursor-pointer rounded border px-1.5 py-0.5 text-[7px] md:inline-block ${style.btn}`}
+          style={PIXEL_FONT}
+        >
+          _
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            closeWindow(win.id);
+          }}
+          className={`cursor-pointer rounded border px-1.5 py-0.5 text-[7px] hover:bg-rose-500/30 ${style.btn}`}
+          style={PIXEL_FONT}
+        >
+          X
+        </button>
+      </div>
+    );
+  };
+
+  const getWindowTitle = (win) => {
+    if (win.id === "terminal") return "TERMINAL · adnan@os";
+    if (win.id === "files") return `FILES · ${formatCwd(explorerPath)}`;
+    if (win.id === "notepad") return `NOTEBAD · ${notePath[notePath.length - 1]}`;
+    return win.title;
+  };
+
   return (
     <section
       id="os"
@@ -1004,7 +1681,6 @@ export default function PortfolioOsSection({
 
       {/* CRT Computer Monitor Shell */}
       <div className="overflow-hidden rounded-lg border-4 border-[#272736] bg-[#12121a] p-3 shadow-[0_24px_55px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.05)]">
-        {/* Desktop Screen Area */}
         <div
           ref={desktopRef}
           onClick={() => setStartMenuOpen(false)}
@@ -1056,596 +1732,64 @@ export default function PortfolioOsSection({
             })}
           </div>
 
-          {/* Mobile stacked windows (< md) */}
+          {/* Mobile stacked windows (< md) supporting ALL Tiny OS apps */}
           <div className="space-y-3 p-3 md:hidden">
-            {windows.terminal.open && !windows.terminal.minimized && (
-              <div className="flex h-64 flex-col overflow-hidden rounded border-2 border-emerald-500/70 bg-[#050c09]">
-                <div className="flex items-center justify-between border-b border-emerald-500/40 bg-[#0a1c14] px-3 py-1.5">
-                  <span className="text-[8px] text-emerald-300" style={PIXEL_FONT}>TERMINAL</span>
-                  <button type="button" onClick={() => closeWindow("terminal")} className="text-[8px] text-emerald-300" style={PIXEL_FONT}>X</button>
-                </div>
-                <div className="arcade-body flex-1 space-y-1 overflow-y-auto p-2.5 text-[12px]">
-                  {lines.map((entry, idx) => (
-                    <pre
-                      key={idx}
-                      className={`whitespace-pre-wrap break-words ${
-                        entry.type === "prompt"
-                          ? "text-amber-300"
-                          : entry.type === "accent"
-                            ? "text-emerald-300"
-                            : entry.type === "error"
-                              ? "text-rose-400"
-                              : entry.type === "muted"
-                                ? "text-white/50"
-                                : "text-white/85"
-                      }`}
-                    >
-                      {entry.text}
-                    </pre>
-                  ))}
-                  <div ref={termEndRef} />
-                </div>
-                <div className="arcade-body flex items-center gap-1.5 border-t border-emerald-500/30 bg-black/70 px-2.5 py-2 text-[12px]">
-                  <span className="text-emerald-400">{formatCwd(cwd)}$</span>
-                  <input
-                    type="text"
-                    value={termInput}
-                    onChange={(e) => setTermInput(e.target.value)}
-                    onKeyDown={handleTermKeyDown}
-                    placeholder="help..."
-                    className="w-full bg-transparent text-white focus:outline-none"
-                  />
-                </div>
-              </div>
-            )}
-
-            {windows.paint.open && !windows.paint.minimized && (
-              <div className="overflow-hidden rounded border-2 border-pink-400/70 bg-[#09060c] p-3">
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-[8px] text-pink-300" style={PIXEL_FONT}>PIXEL PAINT</span>
-                  <button type="button" onClick={() => closeWindow("paint")} className="text-[8px] text-pink-300" style={PIXEL_FONT}>X</button>
-                </div>
-                <div className="mb-2 flex flex-wrap gap-1.5">
-                  {PAINT_COLORS.map((c) => (
-                    <button
-                      key={c.name}
-                      type="button"
-                      onClick={() => setPaintColor(c.hex)}
-                      style={{ backgroundColor: c.hex }}
-                      className={`h-5 w-5 rounded-sm border ${paintColor === c.hex ? "border-white scale-110" : "border-white/30"}`}
-                      title={c.name}
-                    />
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => setPaintGrid(createBlankGrid())}
-                    className="ml-auto rounded border border-white/25 px-2 py-0.5 text-[7px] text-white/80"
-                    style={PIXEL_FONT}
+            {Object.values(windows)
+              .filter((w) => w.open && !w.minimized)
+              .sort((a, b) => b.z - a.z)
+              .map((win) => {
+                const style = WINDOW_STYLES[win.id];
+                return (
+                  <div
+                    key={win.id}
+                    className={`flex flex-col overflow-hidden rounded border-2 ${style.border} ${style.bg} ${
+                      win.id === "terminal" ? "h-64" : ""
+                    }`}
                   >
-                    CLEAR
-                  </button>
-                </div>
-                <div
-                  className="grid gap-px bg-white/10 p-px"
-                  style={{ gridTemplateColumns: `repeat(${PAINT_COLS}, minmax(0, 1fr))` }}
-                >
-                  {paintGrid.map((row, r) =>
-                    row.map((cell, c) => (
-                      <button
-                        key={`${r}-${c}`}
-                        type="button"
-                        onClick={() => paintCell(r, c)}
-                        style={{ backgroundColor: cell }}
-                        className="aspect-square w-full"
-                      />
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
+                    <div className={`flex items-center justify-between border-b px-3 py-1.5 ${style.bar}`}>
+                      <span className={`text-[8px] ${style.title}`} style={PIXEL_FONT}>
+                        {getWindowTitle(win)}
+                      </span>
+                      {renderWindowHeaderActions(win)}
+                    </div>
+                    {renderAppBody(win.id)}
+                  </div>
+                );
+              })}
           </div>
 
           {/* Desktop Draggable Windows (md+) */}
           <div className="pointer-events-none absolute inset-0 hidden md:block">
-            {/* TERMINAL WINDOW */}
-            {windows.terminal.open && !windows.terminal.minimized && (
-              <div
-                onMouseDown={() => focusWindow("terminal")}
-                style={{
-                  left: windows.terminal.x,
-                  top: windows.terminal.y,
-                  width: windows.terminal.w,
-                  height: windows.terminal.h,
-                  zIndex: windows.terminal.z,
-                }}
-                className="pointer-events-auto absolute flex flex-col overflow-hidden rounded border-2 border-emerald-500/75 bg-[#040a08]/95 shadow-[0_14px_32px_rgba(0,0,0,0.8)]"
-              >
-                <div
-                  onPointerDown={(e) => startDragWindow(e, "terminal")}
-                  className="flex cursor-grab items-center justify-between border-b border-emerald-500/40 bg-[#0a1c14] px-3 py-1.5 active:cursor-grabbing"
-                >
-                  <span className="text-[8px] text-emerald-300" style={PIXEL_FONT}>
-                    TERMINAL · adnan@os
-                  </span>
-                  <div className="flex gap-1.5">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        minimizeWindow("terminal");
-                      }}
-                      className="cursor-pointer rounded border border-emerald-500/40 px-1.5 py-0.5 text-[7px] text-emerald-300 hover:bg-emerald-500/20"
-                      style={PIXEL_FONT}
-                    >
-                      _
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        closeWindow("terminal");
-                      }}
-                      className="cursor-pointer rounded border border-emerald-500/40 px-1.5 py-0.5 text-[7px] text-emerald-300 hover:bg-rose-500/30"
-                      style={PIXEL_FONT}
-                    >
-                      X
-                    </button>
-                  </div>
-                </div>
-
-                <div
-                  onClick={() => termInputRef.current?.focus()}
-                  className="arcade-body flex-1 space-y-1 overflow-y-auto p-3 text-[12px] leading-relaxed"
-                >
-                  {lines.map((entry, idx) => (
-                    <pre
-                      key={idx}
-                      className={`whitespace-pre-wrap break-words ${
-                        entry.type === "prompt"
-                          ? "text-amber-300"
-                          : entry.type === "accent"
-                            ? "text-emerald-300"
-                            : entry.type === "error"
-                              ? "text-rose-400"
-                              : entry.type === "muted"
-                                ? "text-white/50"
-                                : "text-white/85"
-                      }`}
-                    >
-                      {entry.text}
-                    </pre>
-                  ))}
-                  <div ref={termEndRef} />
-                </div>
-
-                <div className="arcade-body flex items-center gap-2 border-t border-emerald-500/30 bg-black/80 px-3 py-2 text-[12px]">
-                  <span className="shrink-0 font-semibold text-emerald-400">
-                    {formatCwd(cwd)}$
-                  </span>
-                  <input
-                    ref={termInputRef}
-                    type="text"
-                    value={termInput}
-                    onChange={(e) => setTermInput(e.target.value)}
-                    onKeyDown={handleTermKeyDown}
-                    placeholder="type `help` or `ls`..."
-                    aria-label="Tiny OS terminal input"
-                    className="w-full bg-transparent text-white placeholder-white/30 focus:outline-none"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* FILE EXPLORER WINDOW */}
-            {windows.files.open && !windows.files.minimized && (
-              <div
-                onMouseDown={() => focusWindow("files")}
-                style={{
-                  left: windows.files.x,
-                  top: windows.files.y,
-                  width: windows.files.w,
-                  height: windows.files.h,
-                  zIndex: windows.files.z,
-                }}
-                className="pointer-events-auto absolute flex flex-col overflow-hidden rounded border-2 border-amber-500/70 bg-[#0b0a08]/95 shadow-[0_14px_32px_rgba(0,0,0,0.8)]"
-              >
-                <div
-                  onPointerDown={(e) => startDragWindow(e, "files")}
-                  className="flex cursor-grab items-center justify-between border-b border-amber-500/40 bg-[#1a1509] px-3 py-1.5 active:cursor-grabbing"
-                >
-                  <span className="text-[8px] text-amber-300" style={PIXEL_FONT}>
-                    FILES · {formatCwd(explorerPath)}
-                  </span>
-                  <div className="flex gap-1.5">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        minimizeWindow("files");
-                      }}
-                      className="cursor-pointer rounded border border-amber-500/40 px-1.5 py-0.5 text-[7px] text-amber-300 hover:bg-amber-500/20"
-                      style={PIXEL_FONT}
-                    >
-                      _
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        closeWindow("files");
-                      }}
-                      className="cursor-pointer rounded border border-amber-500/40 px-1.5 py-0.5 text-[7px] text-amber-300 hover:bg-rose-500/30"
-                      style={PIXEL_FONT}
-                    >
-                      X
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1 border-b border-white/10 bg-black/50 px-2 py-1.5">
-                  {explorerPath.length > 2 && (
-                    <button
-                      type="button"
-                      onClick={() => setExplorerPath((p) => p.slice(0, -1))}
-                      className="cursor-pointer rounded border border-white/20 px-1.5 py-0.5 text-[7px] text-amber-300 hover:bg-white/10"
-                      style={PIXEL_FONT}
-                    >
-                      ..
-                    </button>
-                  )}
-                  <input
-                    type="text"
-                    value={newEntryName}
-                    onChange={(e) => setNewEntryName(e.target.value)}
-                    placeholder="new name..."
-                    className="arcade-body min-w-0 flex-1 rounded border border-white/15 bg-black/70 px-1.5 py-0.5 text-[11px] text-white placeholder-white/30 focus:border-amber-400 focus:outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => createEntryInExplorer("file")}
-                    className="cursor-pointer rounded border border-amber-500/50 bg-amber-950/50 px-1.5 py-0.5 text-[7px] text-amber-300 hover:bg-amber-500/25"
-                    style={PIXEL_FONT}
-                    title="Create File"
-                  >
-                    +F
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => createEntryInExplorer("dir")}
-                    className="cursor-pointer rounded border border-emerald-500/50 bg-emerald-950/50 px-1.5 py-0.5 text-[7px] text-emerald-300 hover:bg-emerald-500/25"
-                    style={PIXEL_FONT}
-                    title="Create Folder"
-                  >
-                    +D
-                  </button>
-                </div>
-
-                <div className="arcade-body flex-1 space-y-1 overflow-y-auto p-2 text-[12px]">
-                  {explorerItems.length === 0 ? (
-                    <p className="py-4 text-center text-white/40">(empty)</p>
-                  ) : (
-                    explorerItems.map(([name, node]) => (
-                      <div
-                        key={name}
-                        className="group flex items-center justify-between rounded px-2 py-1 hover:bg-white/10"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (node.type === "dir") {
-                              playMove();
-                              setExplorerPath([...explorerPath, name]);
-                            } else {
-                              openFileInNoteBad([...explorerPath, name]);
-                            }
-                          }}
-                          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left text-white/90 focus:outline-none"
-                        >
-                          {node.type === "dir" ? (
-                            <PixelFolderIcon className="h-4 w-4 shrink-0 text-amber-400" />
-                          ) : (
-                            <PixelFileIcon className="h-4 w-4 shrink-0 text-emerald-300" />
-                          )}
-                          <span className="truncate">{name}</span>
-                        </button>
-                        {!(explorerPath.length <= 2 && ["README.txt", "projects"].includes(name)) && (
-                          <button
-                            type="button"
-                            onClick={() => deleteEntryInExplorer(name)}
-                            className="cursor-pointer px-1 text-[10px] text-white/30 opacity-0 transition group-hover:opacity-100 hover:text-rose-400"
-                            title="Delete"
-                          >
-                            ×
-                          </button>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* NOTEBAD PARODY WINDOW */}
-            {windows.notepad.open && !windows.notepad.minimized && (
-              <div
-                onMouseDown={() => focusWindow("notepad")}
-                style={{
-                  left: windows.notepad.x,
-                  top: windows.notepad.y,
-                  width: windows.notepad.w,
-                  height: windows.notepad.h,
-                  zIndex: windows.notepad.z,
-                }}
-                className="pointer-events-auto absolute flex flex-col overflow-hidden rounded border-2 border-amber-400/75 bg-[#08090c]/95 shadow-[0_14px_32px_rgba(0,0,0,0.85)]"
-              >
-                <div
-                  onPointerDown={(e) => startDragWindow(e, "notepad")}
-                  className="flex cursor-grab items-center justify-between border-b border-amber-400/40 bg-[#18160c] px-3 py-1.5 active:cursor-grabbing"
-                >
-                  <span className="text-[8px] text-amber-300" style={PIXEL_FONT}>
-                    NOTEBAD · {notePath[notePath.length - 1]}
-                  </span>
-                  <div className="flex gap-1.5">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSaveNote();
-                      }}
-                      className="cursor-pointer rounded border border-emerald-400/60 bg-emerald-950/60 px-2 py-0.5 text-[7px] text-emerald-300 hover:bg-emerald-500/25"
-                      style={PIXEL_FONT}
-                    >
-                      SAVE
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        minimizeWindow("notepad");
-                      }}
-                      className="cursor-pointer rounded border border-amber-400/40 px-1.5 py-0.5 text-[7px] text-amber-300 hover:bg-amber-500/20"
-                      style={PIXEL_FONT}
-                    >
-                      _
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        closeWindow("notepad");
-                      }}
-                      className="cursor-pointer rounded border border-amber-400/40 px-1.5 py-0.5 text-[7px] text-amber-300 hover:bg-rose-500/30"
-                      style={PIXEL_FONT}
-                    >
-                      X
-                    </button>
-                  </div>
-                </div>
-
-                {/* NoteBad parody menu bar */}
-                <div className="arcade-body flex items-center gap-3 border-b border-white/10 bg-black/60 px-3 py-1 text-[11px] text-white/70">
-                  <button type="button" onClick={handleSaveNote} className="cursor-pointer hover:text-amber-300">
-                    File
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setNoteStatus("Undo is overrated")}
-                    className="cursor-pointer hover:text-amber-300"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setNoteStatus("Vibes: Immaculate")}
-                    className="cursor-pointer hover:text-emerald-300"
-                  >
-                    Vibes
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setNoteStatus("NoteBad v1.0")}
-                    className="cursor-pointer hover:text-cyan-300"
-                  >
-                    Help
-                  </button>
-                </div>
-
-                <textarea
-                  value={noteText}
-                  onChange={(e) => {
-                    setNoteText(e.target.value);
-                    setNoteStatus("Unsaved genius");
-                  }}
-                  aria-label="NoteBad text editor"
-                  className="arcade-body flex-1 resize-none bg-transparent p-3 text-[12px] leading-relaxed text-white/90 focus:outline-none"
-                />
-                <div className="arcade-body flex items-center justify-between border-t border-white/10 bg-black/60 px-3 py-1 text-[11px] text-emerald-300/80">
-                  <span>{formatCwd(notePath)} · {noteWordCount}w</span>
-                  <span>{noteStatus}</span>
-                </div>
-              </div>
-            )}
-
-            {/* PIXEL PAINT WINDOW */}
-            {windows.paint.open && !windows.paint.minimized && (
-              <div
-                onMouseDown={() => focusWindow("paint")}
-                style={{
-                  left: windows.paint.x,
-                  top: windows.paint.y,
-                  width: windows.paint.w,
-                  height: windows.paint.h,
-                  zIndex: windows.paint.z,
-                }}
-                className="pointer-events-auto absolute flex flex-col overflow-hidden rounded border-2 border-pink-400/80 bg-[#0b070e]/95 shadow-[0_14px_32px_rgba(0,0,0,0.85)]"
-              >
-                <div
-                  onPointerDown={(e) => startDragWindow(e, "paint")}
-                  className="flex cursor-grab items-center justify-between border-b border-pink-400/40 bg-[#1b1022] px-3 py-1.5 active:cursor-grabbing"
-                >
-                  <span className="text-[8px] text-pink-300" style={PIXEL_FONT}>
-                    PIXEL PAINT
-                  </span>
-                  <div className="flex gap-1.5">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSavePaintToVfs();
-                      }}
-                      className="cursor-pointer rounded border border-emerald-400/60 bg-emerald-950/60 px-2 py-0.5 text-[7px] text-emerald-300 hover:bg-emerald-500/25"
-                      style={PIXEL_FONT}
-                    >
-                      SAVE
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        minimizeWindow("paint");
-                      }}
-                      className="cursor-pointer rounded border border-pink-400/40 px-1.5 py-0.5 text-[7px] text-pink-300 hover:bg-pink-500/20"
-                      style={PIXEL_FONT}
-                    >
-                      _
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        closeWindow("paint");
-                      }}
-                      className="cursor-pointer rounded border border-pink-400/40 px-1.5 py-0.5 text-[7px] text-pink-300 hover:bg-rose-500/30"
-                      style={PIXEL_FONT}
-                    >
-                      X
-                    </button>
-                  </div>
-                </div>
-
-                {/* Color Palette Toolbar */}
-                <div className="flex items-center gap-2 border-b border-white/10 bg-black/60 px-3 py-1.5">
-                  <div className="flex items-center gap-1.5">
-                    {PAINT_COLORS.map((c) => (
-                      <button
-                        key={c.name}
-                        type="button"
-                        onClick={() => {
-                          playMove();
-                          setPaintColor(c.hex);
-                          setPaintStatus(c.name);
-                        }}
-                        style={{ backgroundColor: c.hex }}
-                        title={c.name}
-                        className={`h-4 w-4 cursor-pointer rounded-sm border transition ${
-                          paintColor === c.hex
-                            ? "scale-125 border-white shadow-[0_0_6px_rgba(255,255,255,0.6)]"
-                            : "border-white/30"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      playClose();
-                      setPaintGrid(createBlankGrid());
-                      setPaintStatus("Cleared");
-                    }}
-                    className="ml-auto cursor-pointer rounded border border-white/25 px-2 py-0.5 text-[7px] text-white/80 hover:border-pink-300 hover:text-pink-200"
-                    style={PIXEL_FONT}
-                  >
-                    CLEAR
-                  </button>
-                </div>
-
-                {/* Interactive Pixel Grid */}
-                <div
-                  onPointerLeave={() => setPaintDrawing(false)}
-                  className="flex flex-1 items-center justify-center bg-[#040608] p-2.5"
-                >
+            {Object.values(windows)
+              .filter((w) => w.open && !w.minimized)
+              .map((win) => {
+                const style = WINDOW_STYLES[win.id];
+                return (
                   <div
-                    className="grid w-full max-w-[360px] select-none gap-px border border-white/15 bg-white/10 p-px"
-                    style={{ gridTemplateColumns: `repeat(${PAINT_COLS}, minmax(0, 1fr))` }}
-                  >
-                    {paintGrid.map((row, r) =>
-                      row.map((cell, c) => (
-                        <div
-                          key={`${r}-${c}`}
-                          onPointerDown={(e) => {
-                            e.preventDefault();
-                            setPaintDrawing(true);
-                            paintCell(r, c);
-                          }}
-                          onPointerEnter={() => {
-                            if (paintDrawing) paintCell(r, c);
-                          }}
-                          style={{ backgroundColor: cell }}
-                          className="aspect-square w-full cursor-crosshair"
-                        />
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                <div className="arcade-body flex items-center justify-between border-t border-white/10 bg-black/60 px-3 py-1 text-[11px] text-pink-200/80">
-                  <span>{PAINT_COLS}x{PAINT_ROWS} Canvas</span>
-                  <span>{paintStatus}</span>
-                </div>
-              </div>
-            )}
-
-            {/* SYSINFO WINDOW */}
-            {windows.sysinfo.open && !windows.sysinfo.minimized && (
-              <div
-                onMouseDown={() => focusWindow("sysinfo")}
-                style={{
-                  left: windows.sysinfo.x,
-                  top: windows.sysinfo.y,
-                  width: windows.sysinfo.w,
-                  height: windows.sysinfo.h,
-                  zIndex: windows.sysinfo.z,
-                }}
-                className="pointer-events-auto absolute flex flex-col overflow-hidden rounded border-2 border-cyan-400/75 bg-[#040a0e]/95 shadow-[0_14px_32px_rgba(0,0,0,0.85)]"
-              >
-                <div
-                  onPointerDown={(e) => startDragWindow(e, "sysinfo")}
-                  className="flex cursor-grab items-center justify-between border-b border-cyan-400/40 bg-[#081720] px-3 py-1.5 active:cursor-grabbing"
-                >
-                  <span className="text-[8px] text-cyan-300" style={PIXEL_FONT}>
-                    SYSTEM INFO
-                  </span>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      closeWindow("sysinfo");
+                    key={win.id}
+                    onMouseDown={() => focusWindow(win.id)}
+                    style={{
+                      left: win.x,
+                      top: win.y,
+                      width: win.w,
+                      height: win.h,
+                      zIndex: win.z,
                     }}
-                    className="cursor-pointer rounded border border-cyan-400/40 px-1.5 py-0.5 text-[7px] text-cyan-300 hover:bg-rose-500/30"
-                    style={PIXEL_FONT}
+                    className={`pointer-events-auto absolute flex flex-col overflow-hidden rounded border-2 shadow-[0_14px_32px_rgba(0,0,0,0.85)] ${style.border} ${style.bg}`}
                   >
-                    X
-                  </button>
-                </div>
-                <div className="arcade-body space-y-2 p-4 text-[12px] leading-relaxed text-white/85">
-                  <div className="flex items-center gap-2">
-                    <TinyOsLogo className="h-5 w-5" />
-                    <span className="font-semibold text-cyan-300">TINY OS v1.0</span>
+                    <div
+                      onPointerDown={(e) => startDragWindow(e, win.id)}
+                      className={`flex cursor-grab items-center justify-between border-b px-3 py-1.5 active:cursor-grabbing ${style.bar}`}
+                    >
+                      <span className={`text-[8px] ${style.title}`} style={PIXEL_FONT}>
+                        {getWindowTitle(win)}
+                      </span>
+                      {renderWindowHeaderActions(win)}
+                    </div>
+                    {renderAppBody(win.id)}
                   </div>
-                  <p>Host: University of Alberta · CS</p>
-                  <p>Credits: {String(credits).padStart(2, "0")}</p>
-                  <p>
-                    Motherboard Clock:{" "}
-                    <span className={overclock ? "text-cyan-300" : "text-emerald-300"}>
-                      {overclock ? "OVERCLOCK (2.8x)" : "STANDARD (1.0x)"}
-                    </span>
-                  </p>
-                  <p className="text-white/60">
-                    Konami Code: Up Up Down Down Left Right Left Right B A
-                  </p>
-                </div>
-              </div>
-            )}
+                );
+              })}
           </div>
 
           {/* Start Menu Popover */}
@@ -1666,6 +1810,7 @@ export default function PortfolioOsSection({
                   { id: "files", label: "FILE EXPLORER" },
                   { id: "notepad", label: "NOTEBAD" },
                   { id: "paint", label: "PIXEL PAINT" },
+                  { id: "snake", label: "SNAKE.EXE" },
                   { id: "sysinfo", label: "SYSINFO" },
                 ].map((app) => (
                   <button
