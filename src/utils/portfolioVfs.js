@@ -24,7 +24,7 @@ export const DEFAULT_VFS = {
             "experience.txt": {
               type: "file",
               content:
-                "1. Software Developer @ GleamCo (May 2026 - Aug 2026)\n   - Migrated full-stack CRM (TypeScript, Next.js, SQL, NextAuth.js)\n   - Processed $80,000+ revenue, cut quote creation 10m -> <2m\n2. Sales Representative @ TELUS (May 2024 - Jul 2024)\n   - Generated $59,256 in revenue",
+                "1. Software Developer @ GleamCo (May 2026 - Aug 2026)\n   - Migrated full-stack CRM (TypeScript, Next.js, SQL, NextAuth.js)\n   - Processed $80,000+ revenue, cut quote creation 10m -> <2m\n2. Sales Representative @ TELUS Communications Inc. (May 2024 - Aug 2024)\n   - Generated $59,256 in revenue",
             },
             notes: {
               type: "dir",

@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
-import { playHover, playKeyBlip } from "../utils/arcadeSfx";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { playHover, playKeyBlip, playSelect } from "../utils/arcadeSfx";
 import { SkillPixelIcon } from "./SkillPixelIcons";
 
 /**
- * Arcade-style intro: typed greeting, interactive retro skills grid, and UAlberta education plaque.
+ * Arcade-style intro: typed greeting with interactive cursor gag, retro skills grid, and UAlberta education plaque.
  */
 const PIXEL_FONT = { fontFamily: '"Press Start 2P", cursive' };
 const INTRO_TEXT = "Hi, I'm Adnan. Welcome to my website.";
+const INTRO_GAG_TEXT = "Why are you trying to type here? Scroll.";
 const TYPING_DURATION_MS = 3000;
 
 function PixelCodeLogo({ className = "h-7 w-7" }) {
@@ -255,6 +256,14 @@ const SKILL_CATEGORIES = [
 
 export default function ArcadeIntro({ startTyping = false }) {
   const [typedCount, setTypedCount] = useState(0);
+  const [introArmed, setIntroArmed] = useState(false);
+  const [cursorPulseKey, setCursorPulseKey] = useState(0);
+  const [gagCount, setGagCount] = useState(0);
+  const introBoxRef = useRef(null);
+
+  const pulseCursor = useCallback(() => {
+    setCursorPulseKey((k) => k + 1);
+  }, []);
 
   useEffect(() => {
     if (!startTyping) return undefined;
@@ -295,7 +304,55 @@ export default function ArcadeIntro({ startTyping = false }) {
     };
   }, [startTyping]);
 
+  // Disarm intro typing capture when clicking outside the intro greeting block
+  useEffect(() => {
+    if (!introArmed) return undefined;
+
+    const onDocPointerDown = (e) => {
+      if (introBoxRef.current && !introBoxRef.current.contains(e.target)) {
+        setIntroArmed(false);
+      }
+    };
+
+    const onWindowKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIntroArmed(false);
+        return;
+      }
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key === "Tab" || e.key.startsWith("Arrow") || e.key === "PageUp" || e.key === "PageDown") {
+        return;
+      }
+      if (e.key.length === 1 || e.key === "Backspace" || e.key === "Enter") {
+        e.preventDefault();
+        e.stopPropagation();
+        setTypedCount(INTRO_TEXT.length);
+        setGagCount((prev) => Math.min(INTRO_GAG_TEXT.length, prev + 1));
+        playKeyBlip();
+        pulseCursor();
+      }
+    };
+
+    document.addEventListener("pointerdown", onDocPointerDown);
+    window.addEventListener("keydown", onWindowKeyDown, { capture: true });
+    return () => {
+      document.removeEventListener("pointerdown", onDocPointerDown);
+      window.removeEventListener("keydown", onWindowKeyDown, { capture: true });
+    };
+  }, [introArmed, pulseCursor]);
+
+  const handleArmIntro = () => {
+    setIntroArmed(true);
+    pulseCursor();
+    playSelect();
+    introBoxRef.current?.focus({ preventScroll: true });
+  };
+
   const displayedIntro = INTRO_TEXT.slice(0, typedCount);
+  const displayedGag = INTRO_GAG_TEXT.slice(0, gagCount);
+  const cursorStyleClass = introArmed
+    ? "bg-sky-300 ring-2 ring-[#1d4ed8] shadow-[0_0_10px_rgba(56,189,248,0.75)]"
+    : "bg-amber-400";
 
   return (
     <header
@@ -307,23 +364,72 @@ export default function ArcadeIntro({ startTyping = false }) {
       <div className="absolute bottom-4 left-2 h-6 w-6 border-b-2 border-l-2 border-amber-500/50" />
       <div className="absolute bottom-4 right-2 h-6 w-6 border-b-2 border-r-2 border-amber-500/50" />
 
-      <div className="relative mb-8">
-        <h1
-          aria-label={INTRO_TEXT}
-          className="invisible select-none text-[22px] leading-relaxed sm:text-[29px]"
-          style={PIXEL_FONT}
-        >
-          {INTRO_TEXT}
-          <span className="ml-2 inline-block h-[0.85em] w-[0.55em]" />
-        </h1>
-        <p
-          aria-hidden="true"
-          className="absolute inset-0 text-[22px] leading-relaxed text-white sm:text-[29px]"
-          style={PIXEL_FONT}
-        >
-          {displayedIntro}
-          <span className="arcade-boot__blink ml-2 inline-block h-[0.85em] w-[0.55em] bg-amber-400 align-middle" />
-        </p>
+      <div
+        ref={introBoxRef}
+        tabIndex={0}
+        onClick={handleArmIntro}
+        role="textbox"
+        aria-readonly="true"
+        aria-label={INTRO_TEXT}
+        className={`relative mb-8 cursor-text rounded px-2.5 py-2 transition-colors focus:outline-none ${
+          introArmed
+            ? "bg-[#040e24]/85 ring-2 ring-[#1e40af] shadow-[inset_0_0_24px_rgba(2,8,24,0.9),0_0_16px_rgba(30,64,175,0.28)]"
+            : "hover:bg-[#040d21]/45"
+        }`}
+      >
+        <div className="relative">
+          <h1
+            aria-hidden="true"
+            className="invisible select-none text-[22px] leading-relaxed sm:text-[29px]"
+            style={PIXEL_FONT}
+          >
+            {INTRO_TEXT}
+            <span className="ml-2 inline-block h-[0.85em] w-[0.55em]" />
+          </h1>
+          <p
+            aria-hidden="true"
+            className="absolute inset-0 text-[22px] leading-relaxed text-white sm:text-[29px]"
+            style={PIXEL_FONT}
+          >
+            {displayedIntro}
+            {gagCount === 0 && (
+              <span
+                key={`cursor-main-${cursorPulseKey}`}
+                className={`ml-2 inline-block align-middle ${
+                  cursorPulseKey > 0 ? "intro-cursor-detected" : ""
+                }`}
+              >
+                <span className={`intro-cursor-blink block h-[0.85em] w-[0.55em] ${cursorStyleClass}`} />
+              </span>
+            )}
+          </p>
+        </div>
+
+        {(introArmed || gagCount > 0) && (
+          <div className="mt-2.5 flex min-h-[20px] items-center gap-2">
+            {gagCount > 0 ? (
+              <p className="arcade-body text-[13px] text-sky-200 sm:text-[15px]">
+                <span className="mr-1.5 text-amber-400">&gt;</span>
+                {displayedGag}
+                <span
+                  key={`cursor-gag-${cursorPulseKey}`}
+                  className={`ml-1.5 inline-block align-middle ${
+                    cursorPulseKey > 0 ? "intro-cursor-detected" : ""
+                  }`}
+                >
+                  <span className={`intro-cursor-blink block h-[0.95em] w-[0.55em] ${cursorStyleClass}`} />
+                </span>
+              </p>
+            ) : (
+              <span
+                key={`hint-${cursorPulseKey}`}
+                className="arcade-body intro-cursor-detected text-[11px] text-sky-300/85"
+              >
+                &gt; cursor locked in...
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Skills grid */}

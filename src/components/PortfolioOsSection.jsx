@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PROJECTS } from "../data/projects";
 import { playClose, playCoin, playMove, playSelect } from "../utils/arcadeSfx";
+import TinyOsBrowserApp from "./TinyOsBrowserApp";
 import {
   cloneDefaultVfs,
   formatCwd,
@@ -43,6 +44,9 @@ const ALL_COMMANDS = [
   "notepad",
   "paint",
   "snake",
+  "browser",
+  "web",
+  "www",
   "files",
   "coin",
   "overclock",
@@ -223,6 +227,20 @@ function PixelChipIcon({ className = "h-6 w-6" }) {
   );
 }
 
+function PixelBrowserIcon({ className = "h-6 w-6" }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} shapeRendering="crispEdges" style={{ imageRendering: "pixelated" }}>
+      <rect x="1" y="2" width="14" height="12" fill="#082f49" stroke="#22d3ee" strokeWidth="1" />
+      <rect x="2" y="3" width="12" height="2" fill="#22d3ee" />
+      <rect x="3" y="3" width="1" height="1" fill="#060608" />
+      <rect x="5" y="3" width="1" height="1" fill="#060608" />
+      <rect x="3" y="7" width="4" height="5" fill="#fbbf24" />
+      <rect x="8" y="7" width="5" height="2" fill="#34d399" />
+      <rect x="8" y="10" width="4" height="2" fill="#e2e8f0" />
+    </svg>
+  );
+}
+
 function collectFiles(node, basePath = []) {
   if (!node) return [];
   if (node.type === "file") {
@@ -241,6 +259,7 @@ const INITIAL_WINDOWS = {
   notepad: { id: "notepad", title: "NOTEBAD", open: false, minimized: false, x: 210, y: 48, w: 430, h: 300, z: 4 },
   paint: { id: "paint", title: "PAINT", open: false, minimized: false, x: 240, y: 42, w: 430, h: 325, z: 4 },
   snake: { id: "snake", title: "SNAKE.EXE", open: false, minimized: false, x: 260, y: 36, w: 390, h: 330, z: 4 },
+  browser: { id: "browser", title: "BROWSER", open: false, minimized: false, x: 170, y: 24, w: 530, h: 365, z: 4 },
   sysinfo: { id: "sysinfo", title: "SYSINFO", open: false, minimized: false, x: 290, y: 74, w: 360, h: 240, z: 4 },
 };
 
@@ -253,6 +272,7 @@ const INITIAL_ICON_POSITIONS = {
   snake: { x: 14, y: 344 },
   projects: { x: 76, y: 14 },
   sysinfo: { x: 76, y: 80 },
+  browser: { x: 76, y: 146 },
 };
 
 const WINDOW_STYLES = {
@@ -290,6 +310,13 @@ const WINDOW_STYLES = {
     bar: "border-emerald-400/40 bg-[#082015]",
     title: "text-emerald-300",
     btn: "border-emerald-400/40 text-emerald-300 hover:bg-emerald-500/20",
+  },
+  browser: {
+    border: "border-cyan-400/80",
+    bg: "bg-[#030709]/95",
+    bar: "border-cyan-400/45 bg-[#071922]",
+    title: "text-cyan-300",
+    btn: "border-cyan-400/40 text-cyan-300 hover:bg-cyan-500/20",
   },
   sysinfo: {
     border: "border-cyan-400/75",
@@ -816,7 +843,7 @@ export default function PortfolioOsSection({
           { type: "accent", text: "PORTFOLIO COMMANDS:" },
           { type: "text", text: "  skills [q] | projects | open <proj> | goto <sec> | coin | overclock" },
           { type: "accent", text: "OS, APPS & FILE COMMANDS:" },
-          { type: "text", text: "  ls | cd | pwd | cat <file> | notebad [file] | paint | snake | files | clear" },
+          { type: "text", text: "  ls | cd | pwd | cat <file> | notebad [file] | paint | snake | browser | files | clear" },
           { type: "text", text: "  mkdir <dir> | touch <file> | write <file> <text> | echo \"hi\" > f | rm <name> | resetfs" }
         );
         break;
@@ -864,6 +891,13 @@ export default function PortfolioOsSection({
         focusWindow("snake");
         startOrResetSnake(true);
         out.push({ type: "accent", text: "Launched SNAKE.EXE." });
+        break;
+      }
+      case "browser":
+      case "web":
+      case "www": {
+        focusWindow("browser");
+        out.push({ type: "accent", text: "Launched Pixel Browser (http://adnan.local)." });
         break;
       }
       case "notebad":
@@ -1173,6 +1207,7 @@ export default function PortfolioOsSection({
       { kind: "app", label: "NoteBad", id: "notepad" },
       { kind: "app", label: "Pixel Paint", id: "paint" },
       { kind: "app", label: "Snake.exe", id: "snake" },
+      { kind: "app", label: "Pixel Browser", id: "browser" },
       { kind: "app", label: "SysInfo", id: "sysinfo" },
     ];
     for (const a of apps) {
@@ -1264,6 +1299,16 @@ export default function PortfolioOsSection({
         playSelect();
         setExplorerPath(["home", "adnan", "projects"]);
         focusWindow("files");
+      },
+    },
+    {
+      id: "browser",
+      label: "BROWSER",
+      color: "text-cyan-300 hover:bg-cyan-500/15",
+      Icon: PixelBrowserIcon,
+      onOpen: () => {
+        playSelect();
+        focusWindow("browser");
       },
     },
     {
@@ -1640,6 +1685,10 @@ export default function PortfolioOsSection({
       );
     }
 
+    if (id === "browser") {
+      return <TinyOsBrowserApp onOpenProject={onOpenProject} />;
+    }
+
     // sysinfo
     return (
       <div className="arcade-body space-y-2 p-4 text-[12px] leading-relaxed text-white/85">
@@ -1722,6 +1771,7 @@ export default function PortfolioOsSection({
     if (win.id === "terminal") return "TERMINAL · adnan@os";
     if (win.id === "files") return `FILES · ${formatCwd(explorerPath)}`;
     if (win.id === "notepad") return `NOTEBAD · ${notePath[notePath.length - 1]}`;
+    if (win.id === "browser") return "PIXELFOX · http://adnan.local";
     return win.title;
   };
 
@@ -1810,7 +1860,7 @@ export default function PortfolioOsSection({
                   <div
                     key={win.id}
                     className={`flex flex-col overflow-hidden rounded border-2 ${style.border} ${style.bg} ${
-                      win.id === "terminal" ? "h-64" : ""
+                      win.id === "terminal" ? "h-64" : win.id === "browser" ? "h-80" : ""
                     }`}
                   >
                     <div className={`flex items-center justify-between border-b px-3 py-1.5 ${style.bar}`}>
@@ -1878,6 +1928,7 @@ export default function PortfolioOsSection({
                   { id: "notepad", label: "NOTEBAD" },
                   { id: "paint", label: "PIXEL PAINT" },
                   { id: "snake", label: "SNAKE.EXE" },
+                  { id: "browser", label: "PIXEL BROWSER" },
                   { id: "sysinfo", label: "SYSINFO" },
                 ].map((app) => (
                   <button
