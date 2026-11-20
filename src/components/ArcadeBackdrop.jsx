@@ -118,8 +118,13 @@ function createMotherboardCircuits(w, h) {
 /**
  * Retro arcade motherboard + powered-on canvas PCB pulses + 8-bit pixel starfield backdrop.
  */
-export default function ArcadeBackdrop() {
+export default function ArcadeBackdrop({ overclock = false }) {
   const canvasRef = useRef(null);
+  const overclockRef = useRef(overclock);
+
+  useEffect(() => {
+    overclockRef.current = overclock;
+  }, [overclock]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -148,19 +153,29 @@ export default function ArcadeBackdrop() {
     window.addEventListener("resize", resize);
 
     let frameId = 0;
-    const startedAt = performance.now();
+    let lastNow = performance.now();
+    let virtualTime = 0;
 
     const draw = (now) => {
-      const elapsedSec = (now - startedAt) / 1000;
+      const dt = Math.min(0.1, (now - lastNow) / 1000);
+      lastNow = now;
+      const isOc = overclockRef.current;
+      virtualTime += dt * (isOc ? 2.8 : 1);
+
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
 
       // Draw static motherboard bus rails + solder pads
       for (const { poly, color, baseAlpha } of data.circuits) {
+        const railColor = isOc
+          ? color === "#fbbf24"
+            ? "#fde047"
+            : "#22d3ee"
+          : color;
         ctx.save();
-        ctx.globalAlpha = baseAlpha;
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.5;
+        ctx.globalAlpha = isOc ? Math.min(0.45, baseAlpha * 1.7) : baseAlpha;
+        ctx.strokeStyle = railColor;
+        ctx.lineWidth = isOc ? 2 : 1.5;
         ctx.beginPath();
         poly.points.forEach(([x, y], idx) => {
           if (idx === 0) ctx.moveTo(x, y);
@@ -169,7 +184,7 @@ export default function ArcadeBackdrop() {
         ctx.stroke();
 
         // Small square solder pads at vertices
-        ctx.fillStyle = color;
+        ctx.fillStyle = railColor;
         for (let i = 1; i < poly.points.length - 1; i += 1) {
           const [vx, vy] = poly.points[i];
           ctx.fillRect(Math.round(vx) - 2, Math.round(vy) - 2, 5, 5);
@@ -179,21 +194,31 @@ export default function ArcadeBackdrop() {
 
       // Draw glowing animated pulses with fading trails
       for (const pulse of data.pulses) {
-        const headDist = pulse.offset * pulse.poly.total + elapsedSec * pulse.speed;
+        const headDist = pulse.offset * pulse.poly.total + virtualTime * pulse.speed;
         const steps = 16;
+        const headColor = isOc
+          ? pulse.glowColor === "#fbbf24"
+            ? "#fef08a"
+            : "#a5f3fc"
+          : pulse.headColor;
+        const glowColor = isOc
+          ? pulse.glowColor === "#fbbf24"
+            ? "#facc15"
+            : "#22d3ee"
+          : pulse.glowColor;
 
         ctx.save();
         for (let s = steps; s >= 0; s -= 1) {
           const t = s / steps; // 1 at tail, 0 at head
-          const d = headDist - t * pulse.tailLen;
+          const d = headDist - t * (isOc ? pulse.tailLen * 1.35 : pulse.tailLen);
           const [x, y] = samplePolyline(pulse.poly, d);
-          const alpha = (1 - t) * (1 - t) * 0.9;
-          const size = s === 0 ? 6 : Math.max(2, Math.round(4.5 * (1 - t * 0.6)));
+          const alpha = (1 - t) * (1 - t) * (isOc ? 1 : 0.9);
+          const size = s === 0 ? (isOc ? 7 : 6) : Math.max(2, Math.round(4.5 * (1 - t * 0.6)));
 
           ctx.globalAlpha = alpha;
-          ctx.shadowBlur = s === 0 ? 14 : 6;
-          ctx.shadowColor = pulse.glowColor;
-          ctx.fillStyle = s <= 2 ? pulse.headColor : pulse.glowColor;
+          ctx.shadowBlur = s === 0 ? (isOc ? 18 : 14) : 6;
+          ctx.shadowColor = glowColor;
+          ctx.fillStyle = s <= 2 ? headColor : glowColor;
           ctx.fillRect(
             Math.round(x - size / 2),
             Math.round(y - size / 2),

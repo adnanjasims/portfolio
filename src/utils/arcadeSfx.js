@@ -80,3 +80,10 @@ export function playCoin() {
   playTone(987.77, 70, "square", 0.045);
   playTone(1318.51, 220, "square", 0.045, 70);
 }
+
+export function playOverclock() {
+  playTone(523.25, 65, "square", 0.045, 0);
+  playTone(659.25, 65, "square", 0.045, 65);
+  playTone(783.99, 65, "square", 0.045, 130);
+  playTone(1046.5, 180, "square", 0.05, 195);
+}

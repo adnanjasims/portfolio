@@ -9,6 +9,10 @@ export default function ArcadePageFrame({
   children,
   sfxEnabled = false,
   onToggleSfx,
+  onOpenTerminal,
+  overclockUnlocked = false,
+  overclock = false,
+  onToggleOverclock,
 }) {
   const scrollToProjects = () => {
     document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
@@ -55,20 +59,47 @@ export default function ArcadePageFrame({
           PRESS START
         </button>
 
-        <button
-          type="button"
-          onClick={() => onToggleSfx?.()}
-          aria-pressed={sfxEnabled}
-          className={`relative z-10 cursor-pointer rounded border px-2.5 py-1 text-[8px] uppercase tracking-wider transition focus:outline-none focus:ring-1 focus:ring-amber-400 sm:text-[9px] ${
-            sfxEnabled
-              ? "border-emerald-400/80 bg-emerald-950/60 text-emerald-300 hover:bg-emerald-900/60"
-              : "border-white/25 bg-black/60 text-white/60 hover:border-amber-400/70 hover:text-amber-300"
-          }`}
-          style={PIXEL_FONT}
-          title="Toggle 8-bit sound effects"
-        >
-          SFX: {sfxEnabled ? "ON" : "OFF"}
-        </button>
+        <div className="relative z-10 flex items-center gap-2">
+          {overclockUnlocked && (
+            <button
+              type="button"
+              onClick={() => onToggleOverclock?.()}
+              aria-pressed={overclock}
+              className={`cursor-pointer rounded border px-2 py-1 text-[8px] uppercase tracking-wider transition focus:outline-none focus:ring-1 focus:ring-cyan-400 sm:text-[9px] ${
+                overclock
+                  ? "border-cyan-400 bg-cyan-950/70 text-cyan-300 hover:bg-cyan-900/60"
+                  : "border-white/25 bg-black/60 text-white/60 hover:border-cyan-400/70 hover:text-cyan-300"
+              }`}
+              style={PIXEL_FONT}
+              title="Toggle Overclock mode"
+            >
+              OC: {overclock ? "ON" : "OFF"}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => onOpenTerminal?.()}
+            className="cursor-pointer rounded border border-emerald-500/60 bg-emerald-950/50 px-2.5 py-1 text-[8px] uppercase tracking-wider text-emerald-300 transition hover:border-emerald-300 hover:bg-emerald-900/50 focus:outline-none focus:ring-1 focus:ring-emerald-400 sm:text-[9px]"
+            style={PIXEL_FONT}
+            title="Open Portfolio Terminal (~)"
+          >
+            TERM
+          </button>
+          <button
+            type="button"
+            onClick={() => onToggleSfx?.()}
+            aria-pressed={sfxEnabled}
+            className={`cursor-pointer rounded border px-2.5 py-1 text-[8px] uppercase tracking-wider transition focus:outline-none focus:ring-1 focus:ring-amber-400 sm:text-[9px] ${
+              sfxEnabled
+                ? "border-emerald-400/80 bg-emerald-950/60 text-emerald-300 hover:bg-emerald-900/60"
+                : "border-white/25 bg-black/60 text-white/60 hover:border-amber-400/70 hover:text-amber-300"
+            }`}
+            style={PIXEL_FONT}
+            title="Toggle 8-bit sound effects"
+          >
+            SFX: {sfxEnabled ? "ON" : "OFF"}
+          </button>
+        </div>
       </div>
 
       <main className="relative z-10 flex flex-1 flex-col items-center px-4 md:ml-[200px] md:mr-[200px] lg:ml-[240px] lg:mr-[240px]">

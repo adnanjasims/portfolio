@@ -286,6 +286,96 @@ body {
   animation: arcade-star-drift 60s linear infinite;
 }
 
+/* Skill category hover animations (stepped ~3-4 fps retro feel) */
+@keyframes skill-cursor-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0.15;
+  }
+}
+
+@keyframes skill-data-clean {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translateX(2px);
+    opacity: 1;
+  }
+}
+
+@keyframes skill-nn-fire {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+@keyframes skill-tool-nudge {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-1px, -1px);
+  }
+}
+
+@keyframes skill-driver-nudge {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(1px, -1px);
+  }
+}
+
+.group:hover .skill-anim-cursor {
+  animation: skill-cursor-blink 0.8s steps(2, end) infinite;
+}
+
+.group:hover .skill-anim-data-1 {
+  animation: skill-data-clean 1s steps(3, end) infinite;
+}
+
+.group:hover .skill-anim-data-2 {
+  animation: skill-data-clean 1s steps(3, end) 0.25s infinite;
+}
+
+.group:hover .skill-anim-data-3 {
+  animation: skill-data-clean 1s steps(3, end) 0.5s infinite;
+}
+
+.group:hover .skill-anim-nn-1 {
+  animation: skill-nn-fire 1.05s steps(3, end) infinite;
+}
+
+.group:hover .skill-anim-nn-2 {
+  animation: skill-nn-fire 1.05s steps(3, end) 0.35s infinite;
+}
+
+.group:hover .skill-anim-nn-3 {
+  animation: skill-nn-fire 1.05s steps(3, end) 0.7s infinite;
+}
+
+.group:hover .skill-anim-tool {
+  animation: skill-tool-nudge 0.9s steps(3, end) infinite;
+}
+
+.group:hover .skill-anim-driver {
+  animation: skill-driver-nudge 0.9s steps(3, end) 0.3s infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .arcade-boot,
   .arcade-boot--dissolve .arcade-boot__panel,

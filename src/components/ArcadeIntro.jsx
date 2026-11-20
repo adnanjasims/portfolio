@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { playHover, playKeyBlip } from "../utils/arcadeSfx";
+import { SkillPixelIcon } from "./SkillPixelIcons";
 
 /**
  * Arcade-style intro: typed greeting, interactive retro skills grid, and UAlberta education plaque.
@@ -18,17 +19,18 @@ function PixelCodeLogo({ className = "h-7 w-7" }) {
       style={{ imageRendering: "pixelated" }}
     >
       {/* Left < */}
-      <rect x="4" y="4" width="2" height="2" />
-      <rect x="2" y="6" width="2" height="4" />
-      <rect x="4" y="10" width="2" height="2" />
+      <rect x="3" y="4" width="2" height="2" />
+      <rect x="1" y="6" width="2" height="4" />
+      <rect x="3" y="10" width="2" height="2" />
       {/* Middle / */}
-      <rect x="8" y="3" width="2" height="2" opacity="0.7" />
-      <rect x="7" y="5" width="2" height="6" opacity="0.85" />
-      <rect x="6" y="11" width="2" height="2" opacity="0.7" />
-      {/* Right > */}
-      <rect x="10" y="4" width="2" height="2" />
-      <rect x="12" y="6" width="2" height="4" />
-      <rect x="10" y="10" width="2" height="2" />
+      <rect x="7" y="3" width="2" height="2" opacity="0.7" />
+      <rect x="6" y="5" width="2" height="6" opacity="0.85" />
+      <rect x="5" y="11" width="2" height="2" opacity="0.7" />
+      {/* Right > + blinking compiler cursor */}
+      <rect x="9" y="4" width="2" height="2" />
+      <rect x="11" y="6" width="2" height="4" />
+      <rect x="9" y="10" width="2" height="2" />
+      <rect x="13" y="11" width="2" height="2" className="skill-anim-cursor" />
     </svg>
   );
 }
@@ -42,20 +44,14 @@ function PixelDataLogo({ className = "h-7 w-7" }) {
       aria-hidden="true"
       style={{ imageRendering: "pixelated" }}
     >
-      {/* Top disc */}
-      <rect x="4" y="2" width="8" height="1" />
-      <rect x="3" y="3" width="10" height="2" />
-      <rect x="4" y="5" width="8" height="1" opacity="0.5" />
-      {/* Middle tier */}
-      <rect x="3" y="6" width="2" height="3" />
-      <rect x="11" y="6" width="2" height="3" />
-      <rect x="5" y="7" width="6" height="2" opacity="0.7" />
-      <rect x="4" y="9" width="8" height="1" />
-      {/* Bottom tier */}
-      <rect x="3" y="10" width="2" height="3" />
-      <rect x="11" y="10" width="2" height="3" />
-      <rect x="5" y="11" width="6" height="2" opacity="0.7" />
-      <rect x="4" y="13" width="8" height="1" />
+      {/* Database cylinder + animated data cleaning/sorting bars */}
+      <rect x="2" y="2" width="12" height="2" />
+      <rect x="2" y="4" width="2" height="10" />
+      <rect x="12" y="4" width="2" height="10" />
+      <rect x="2" y="13" width="12" height="1" />
+      <rect x="5" y="5" width="4" height="2" className="skill-anim-data-1" />
+      <rect x="5" y="8" width="6" height="2" className="skill-anim-data-2" />
+      <rect x="5" y="11" width="5" height="1" className="skill-anim-data-3" />
     </svg>
   );
 }
@@ -69,27 +65,27 @@ function PixelAiMlLogo({ className = "h-7 w-7" }) {
       aria-hidden="true"
       style={{ imageRendering: "pixelated" }}
     >
-      {/* Top / bottom / side pins */}
-      <rect x="5" y="1" width="2" height="2" opacity="0.7" />
-      <rect x="9" y="1" width="2" height="2" opacity="0.7" />
-      <rect x="5" y="13" width="2" height="2" opacity="0.7" />
-      <rect x="9" y="13" width="2" height="2" opacity="0.7" />
-      <rect x="1" y="5" width="2" height="2" opacity="0.7" />
-      <rect x="1" y="9" width="2" height="2" opacity="0.7" />
-      <rect x="13" y="5" width="2" height="2" opacity="0.7" />
-      <rect x="13" y="9" width="2" height="2" opacity="0.7" />
-      {/* Chip frame */}
-      <rect x="3" y="3" width="10" height="2" />
-      <rect x="3" y="11" width="10" height="2" />
-      <rect x="3" y="5" width="2" height="6" />
-      <rect x="11" y="5" width="2" height="6" />
-      {/* Glowing core */}
-      <rect x="6" y="6" width="4" height="4" />
+      {/* Input layer nodes */}
+      <rect x="1" y="3" width="2" height="2" className="skill-anim-nn-1" />
+      <rect x="1" y="7" width="2" height="2" className="skill-anim-nn-1" />
+      <rect x="1" y="11" width="2" height="2" className="skill-anim-nn-1" />
+      {/* Synapses */}
+      <rect x="3" y="4" width="4" height="1" opacity="0.45" className="skill-anim-nn-2" />
+      <rect x="3" y="8" width="4" height="1" opacity="0.45" className="skill-anim-nn-2" />
+      <rect x="3" y="11" width="4" height="1" opacity="0.45" className="skill-anim-nn-2" />
+      {/* Hidden core */}
+      <rect x="7" y="4" width="2" height="2" className="skill-anim-nn-2" />
+      <rect x="7" y="7" width="2" height="2" className="skill-anim-nn-2" />
+      <rect x="7" y="10" width="2" height="2" className="skill-anim-nn-2" />
+      {/* Output synapses + node */}
+      <rect x="9" y="6" width="4" height="1" opacity="0.5" className="skill-anim-nn-3" />
+      <rect x="9" y="9" width="4" height="1" opacity="0.5" className="skill-anim-nn-3" />
+      <rect x="13" y="6" width="2" height="4" className="skill-anim-nn-3" />
     </svg>
   );
 }
 
-function PixelCloudLogo({ className = "h-7 w-7" }) {
+function PixelToolsLogo({ className = "h-7 w-7" }) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -98,15 +94,29 @@ function PixelCloudLogo({ className = "h-7 w-7" }) {
       aria-hidden="true"
       style={{ imageRendering: "pixelated" }}
     >
-      {/* 8-bit cloud body */}
-      <rect x="6" y="3" width="4" height="2" />
-      <rect x="4" y="5" width="8" height="2" />
-      <rect x="2" y="7" width="12" height="4" />
-      <rect x="3" y="11" width="10" height="1" />
-      {/* Pixel server/link dots below */}
-      <rect x="4" y="13" width="2" height="1" opacity="0.65" />
-      <rect x="7" y="13" width="2" height="1" opacity="0.85" />
-      <rect x="10" y="13" width="2" height="1" opacity="0.65" />
+      {/* Classic crossed 8-bit Wrench & Screwdriver (unambiguous Tools icon) */}
+      <g className="skill-anim-tool">
+        {/* Wrench jaw (top-left) */}
+        <rect x="1" y="2" width="2" height="3" />
+        <rect x="2" y="1" width="3" height="2" />
+        <rect x="4" y="2" width="2" height="2" />
+        <rect x="2" y="4" width="2" height="2" />
+        {/* Wrench diagonal shaft -> bottom-right handle */}
+        <rect x="4" y="4" width="2" height="2" />
+        <rect x="6" y="6" width="2" height="2" />
+        <rect x="8" y="8" width="2" height="2" />
+        <rect x="10" y="10" width="2" height="2" />
+        <rect x="11" y="11" width="3" height="3" />
+      </g>
+      {/* Screwdriver (top-right -> bottom-left) */}
+      <g className="skill-anim-driver" opacity="0.85">
+        <rect x="12" y="1" width="3" height="2" />
+        <rect x="11" y="2" width="2" height="2" />
+        <rect x="9" y="4" width="2" height="2" />
+        <rect x="5" y="8" width="2" height="2" />
+        <rect x="3" y="10" width="2" height="2" />
+        <rect x="1" y="12" width="3" height="3" />
+      </g>
     </svg>
   );
 }
@@ -186,12 +196,12 @@ const SKILL_CATEGORIES = [
     Logo: PixelCodeLogo,
     items: [
       "Python",
+      "TypeScript",
+      "JavaScript (Next, React, Node)",
       "SQL",
+      "Java",
       "C",
       "HTML/CSS",
-      "Java",
-      "JavaScript (Next, React, Node)",
-      "TypeScript",
     ],
   },
   {
@@ -200,13 +210,13 @@ const SKILL_CATEGORIES = [
     Logo: PixelDataLogo,
     items: [
       "PostgreSQL",
-      "SQLite",
-      "GraphQL",
-      "NoSQL",
-      "BigQuery",
-      "Scikit-Learn",
       "Pandas",
       "NumPy",
+      "Scikit-Learn",
+      "BigQuery",
+      "GraphQL",
+      "NoSQL",
+      "SQLite",
       "R",
     ],
   },
@@ -215,30 +225,30 @@ const SKILL_CATEGORIES = [
     title: "AI & ML",
     Logo: PixelAiMlLogo,
     items: [
-      "MCP",
-      "RAG",
-      "Reinforcement Learning",
-      "Claude",
-      "Copilot",
-      "Cursor",
-      "Gemini API",
-      "Ollama",
       "PyTorch",
       "TensorFlow",
+      "RAG",
+      "Reinforcement Learning",
+      "MCP",
+      "Gemini API",
+      "Claude",
+      "Cursor",
+      "Copilot",
+      "Ollama",
     ],
   },
   {
     id: "cloud-devops",
     title: "Cloud, DevOps, & Tools",
-    Logo: PixelCloudLogo,
+    Logo: PixelToolsLogo,
     items: [
-      "Git",
-      "CI/CD",
       "AWS",
-      "Gradle",
       "Docker",
       "Kubernetes",
+      "Git",
+      "CI/CD",
       "Linux",
+      "Gradle",
     ],
   },
 ];
@@ -355,9 +365,12 @@ export default function ArcadeIntro({ startTyping = false }) {
                     <span
                       key={skill}
                       onMouseEnter={() => playHover()}
-                      className="arcade-body cursor-default rounded border border-white/15 bg-black/80 px-2.5 py-0.5 text-[12.5px] font-medium leading-snug text-white/85 transition-all duration-150 hover:-translate-y-0.5 hover:border-amber-300 hover:bg-amber-400 hover:text-black hover:shadow-[0_4px_12px_rgba(251,191,36,0.28)] sm:text-[14px]"
+                      className="arcade-body inline-flex cursor-default items-center gap-2 rounded border border-white/15 bg-black/80 px-2.5 py-1 text-[12.5px] font-medium leading-snug text-white/85 transition-all duration-150 hover:-translate-y-0.5 hover:border-amber-300 hover:bg-amber-400 hover:text-black hover:shadow-[0_4px_12px_rgba(251,191,36,0.28)] sm:text-[14px]"
                     >
-                      {skill}
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm bg-black/85 p-0.5">
+                        <SkillPixelIcon name={skill} className="h-4 w-4" />
+                      </span>
+                      <span>{skill}</span>
                     </span>
                   ))}
                 </div>

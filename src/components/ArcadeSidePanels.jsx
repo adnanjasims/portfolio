@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { id: "intro", label: "INTRO" },
   { id: "skills", label: "SKILLS" },
   { id: "education", label: "EDUCATION" },
+  { id: "os", label: "TINY OS" },
   { id: "experience", label: "EXPERIENCE" },
   { id: "projects", label: "PROJECTS" },
   { id: "chess", label: "CHESS" },
@@ -22,6 +23,7 @@ export default function ArcadeSidePanels({
   credits = 0,
   onInsertCoin,
   onReplayBoot,
+  onOpenTerminal,
 }) {
   const [activeSection, setActiveSection] = useState("intro");
 
@@ -170,6 +172,15 @@ export default function ArcadeSidePanels({
             <p className="mt-1 text-[11px] tabular-nums text-emerald-300" style={PIXEL_FONT}>
               {String(credits).padStart(2, "0")}
             </p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onOpenTerminal?.()}
+            className="w-full cursor-pointer rounded border-2 border-emerald-500/50 bg-emerald-950/35 px-2 py-2 text-[7px] uppercase text-emerald-300 transition hover:border-emerald-300 hover:bg-emerald-900/40 active:translate-y-0.5 focus:outline-none lg:text-[8px]"
+            style={PIXEL_FONT}
+          >
+            TERMINAL (~)
           </button>
 
           <button

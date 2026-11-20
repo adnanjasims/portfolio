@@ -4,24 +4,26 @@ const PIXEL_FONT = { fontFamily: '"Press Start 2P", cursive' };
 
 /**
  * Retro arcade cabinet: detailed bezel, CRT-style screen (pixel grid, scanlines),
- * interactive two-player control panel + working COIN slot.
+ * interactive two-player control panel (4-way stick + B/A/GO + COIN + shortcuts).
  */
 export default function ArcadeCabinet({
   children,
   onMoveSelection,
   onLaunchSelected,
+  onArcadeInput,
   credits = 0,
   onInsertCoin,
   onJumpSection,
   onReplayBoot,
 }) {
-  const [stickTilt, setStickTilt] = useState(0); // -1 up, 0 center, 1 down
+  const [stickDir, setStickDir] = useState(""); // up | down | left | right | ""
   const [coinFlash, setCoinFlash] = useState(false);
 
-  const handleMove = (delta) => {
-    setStickTilt(delta);
-    onMoveSelection?.(delta);
-    window.setTimeout(() => setStickTilt(0), 140);
+  const pulseStick = (dir, keyName, moveDelta = 0) => {
+    setStickDir(dir);
+    if (moveDelta !== 0) onMoveSelection?.(moveDelta);
+    onArcadeInput?.(keyName);
+    window.setTimeout(() => setStickDir(""), 140);
   };
 
   const handleCoin = () => {
@@ -29,6 +31,17 @@ export default function ArcadeCabinet({
     onInsertCoin?.();
     window.setTimeout(() => setCoinFlash(false), 450);
   };
+
+  const stickOffsetClass =
+    stickDir === "up"
+      ? "-translate-y-1.5"
+      : stickDir === "down"
+        ? "translate-y-1.5"
+        : stickDir === "left"
+          ? "-translate-x-1.5"
+          : stickDir === "right"
+            ? "translate-x-1.5"
+            : "";
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center bg-[#0c0c0f] p-3 md:p-6">
@@ -83,75 +96,126 @@ export default function ArcadeCabinet({
 
         {/* Two-player interactive control panel */}
         <div className="mt-4 flex flex-wrap items-end justify-between gap-4 border-t-4 border-[#22222c] bg-gradient-to-b from-[#16161e] to-[#0e0e14] px-5 py-5 sm:px-6">
-          {/* Player 1 interactive joystick + buttons */}
+          {/* Player 1 interactive 4-way joystick + D-pad + B / A / GO buttons */}
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-center gap-1">
-              <div className="relative flex h-11 w-11 items-center justify-center rounded-sm border-2 border-[#333340] bg-[#252530] shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
+              <div className="relative flex h-12 w-12 items-center justify-center rounded-sm border-2 border-[#333340] bg-[#252530] shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
                 <button
                   type="button"
-                  onClick={() => handleMove(-1)}
-                  aria-label="Move project selection up"
-                  title="Move Up"
-                  className="absolute inset-x-0 top-0 h-1/2 cursor-pointer text-[7px] text-amber-300/60 hover:text-amber-200 focus:outline-none"
+                  onClick={() => pulseStick("up", "arrowup", -1)}
+                  aria-label="Up"
+                  title="Up"
+                  className="absolute inset-x-3 top-0 h-4 cursor-pointer text-[6px] leading-none text-amber-300/70 hover:text-amber-200 focus:outline-none"
                 >
                   ▲
                 </button>
-                <div
-                  className={`pointer-events-none h-4 w-4 rounded-full border border-amber-400/50 bg-amber-600 shadow-sm transition-transform duration-100 ${
-                    stickTilt === -1
-                      ? "-translate-y-1.5"
-                      : stickTilt === 1
-                        ? "translate-y-1.5"
-                        : ""
-                  }`}
-                />
                 <button
                   type="button"
-                  onClick={() => handleMove(1)}
-                  aria-label="Move project selection down"
-                  title="Move Down"
-                  className="absolute inset-x-0 bottom-0 h-1/2 cursor-pointer text-[7px] text-amber-300/60 hover:text-amber-200 focus:outline-none"
+                  onClick={() => pulseStick("down", "arrowdown", 1)}
+                  aria-label="Down"
+                  title="Down"
+                  className="absolute inset-x-3 bottom-0 h-4 cursor-pointer text-[6px] leading-none text-amber-300/70 hover:text-amber-200 focus:outline-none"
                 >
                   ▼
                 </button>
+                <button
+                  type="button"
+                  onClick={() => pulseStick("left", "arrowleft")}
+                  aria-label="Left"
+                  title="Left"
+                  className="absolute inset-y-3 left-0 w-4 cursor-pointer text-[6px] leading-none text-amber-300/70 hover:text-amber-200 focus:outline-none"
+                >
+                  ◄
+                </button>
+                <button
+                  type="button"
+                  onClick={() => pulseStick("right", "arrowright")}
+                  aria-label="Right"
+                  title="Right"
+                  className="absolute inset-y-3 right-0 w-4 cursor-pointer text-[6px] leading-none text-amber-300/70 hover:text-amber-200 focus:outline-none"
+                >
+                  ►
+                </button>
+                <div
+                  className={`pointer-events-none h-4 w-4 rounded-full border border-amber-400/50 bg-amber-600 shadow-sm transition-transform duration-100 ${stickOffsetClass}`}
+                />
               </div>
               <span className="text-[10px] uppercase tracking-widest text-slate-400" style={PIXEL_FONT}>P1</span>
             </div>
 
             <div className="flex flex-col gap-1">
-              <div className="flex gap-1.5">
+              {/* Row 1: 4-way directional buttons */}
+              <div className="flex gap-1">
                 <button
                   type="button"
-                  onClick={() => handleMove(-1)}
-                  title="Previous Project"
-                  aria-label="Previous project"
-                  className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-none border-2 border-[#3a3a4a] bg-amber-950 text-[8px] text-amber-300 shadow-[inset_0_1px_0_rgba(251,191,36,0.2)] transition active:translate-y-0.5 hover:border-amber-400/70 hover:bg-amber-900/70 focus:outline-none"
+                  onClick={() => pulseStick("left", "arrowleft")}
+                  title="Left"
+                  aria-label="Left button"
+                  className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-none border-2 border-[#3a3a4a] bg-amber-950 text-[7px] text-amber-300 shadow-[inset_0_1px_0_rgba(251,191,36,0.2)] transition active:translate-y-0.5 hover:border-amber-400/70 hover:bg-amber-900/70 focus:outline-none"
+                >
+                  ◄
+                </button>
+                <button
+                  type="button"
+                  onClick={() => pulseStick("up", "arrowup", -1)}
+                  title="Up"
+                  aria-label="Up button"
+                  className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-none border-2 border-[#3a3a4a] bg-amber-950 text-[7px] text-amber-300 shadow-[inset_0_1px_0_rgba(251,191,36,0.2)] transition active:translate-y-0.5 hover:border-amber-400/70 hover:bg-amber-900/70 focus:outline-none"
                 >
                   ▲
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleMove(1)}
-                  title="Next Project"
-                  aria-label="Next project"
-                  className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-none border-2 border-[#3a3a4a] bg-amber-950 text-[8px] text-amber-300 shadow-[inset_0_1px_0_rgba(251,191,36,0.2)] transition active:translate-y-0.5 hover:border-amber-400/70 hover:bg-amber-900/70 focus:outline-none"
+                  onClick={() => pulseStick("down", "arrowdown", 1)}
+                  title="Down"
+                  aria-label="Down button"
+                  className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-none border-2 border-[#3a3a4a] bg-amber-950 text-[7px] text-amber-300 shadow-[inset_0_1px_0_rgba(251,191,36,0.2)] transition active:translate-y-0.5 hover:border-amber-400/70 hover:bg-amber-900/70 focus:outline-none"
                 >
                   ▼
+                </button>
+                <button
+                  type="button"
+                  onClick={() => pulseStick("right", "arrowright")}
+                  title="Right"
+                  aria-label="Right button"
+                  className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-none border-2 border-[#3a3a4a] bg-amber-950 text-[7px] text-amber-300 shadow-[inset_0_1px_0_rgba(251,191,36,0.2)] transition active:translate-y-0.5 hover:border-amber-400/70 hover:bg-amber-900/70 focus:outline-none"
+                >
+                  ►
+                </button>
+              </div>
+              {/* Row 2: B, A, and GO action buttons */}
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => onArcadeInput?.("b")}
+                  title="B button"
+                  aria-label="B button"
+                  className="flex h-6 w-7 cursor-pointer items-center justify-center rounded-none border-2 border-rose-500/60 bg-rose-950/70 text-[8px] text-rose-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition active:translate-y-0.5 hover:bg-rose-800/80 focus:outline-none"
+                  style={PIXEL_FONT}
+                >
+                  B
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onArcadeInput?.("a")}
+                  title="A button"
+                  aria-label="A button"
+                  className="flex h-6 w-7 cursor-pointer items-center justify-center rounded-none border-2 border-emerald-500/60 bg-emerald-950/70 text-[8px] text-emerald-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition active:translate-y-0.5 hover:bg-emerald-800/80 focus:outline-none"
+                  style={PIXEL_FONT}
+                >
+                  A
                 </button>
                 <button
                   type="button"
                   onClick={() => onLaunchSelected?.()}
                   title="Open Selected Project"
                   aria-label="Open selected project"
-                  className="flex h-6 w-10 cursor-pointer items-center justify-center rounded-none border-2 border-amber-500/70 bg-amber-600/80 text-[7px] text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] transition active:translate-y-0.5 hover:bg-amber-400 focus:outline-none"
+                  className="flex h-6 flex-1 cursor-pointer items-center justify-center rounded-none border-2 border-amber-500/70 bg-amber-600/80 px-2 text-[7px] text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] transition active:translate-y-0.5 hover:bg-amber-400 focus:outline-none"
                   style={PIXEL_FONT}
                 >
                   GO
                 </button>
               </div>
-              <span className="text-[7px] uppercase tracking-wider text-slate-500" style={PIXEL_FONT}>
-                STICK · OPEN
-              </span>
             </div>
           </div>
 
