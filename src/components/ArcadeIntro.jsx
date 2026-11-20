@@ -1,80 +1,425 @@
+import { useEffect, useState } from "react";
+import { playHover, playKeyBlip } from "../utils/arcadeSfx";
+
 /**
- * Arcade-style intro: tagline, bio, and Focus / What I like / Looking for.
+ * Arcade-style intro: typed greeting, interactive retro skills grid, and UAlberta education plaque.
  */
-export default function ArcadeIntro() {
+const PIXEL_FONT = { fontFamily: '"Press Start 2P", cursive' };
+const INTRO_TEXT = "Hi, I'm Adnan. Welcome to my website.";
+const TYPING_DURATION_MS = 3000;
+
+function PixelCodeLogo({ className = "h-7 w-7" }) {
   return (
-    <header className="arcade-screen relative mx-auto w-full max-w-2xl px-6 py-8 pb-12 text-center">
+    <svg
+      viewBox="0 0 16 16"
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+      style={{ imageRendering: "pixelated" }}
+    >
+      {/* Left < */}
+      <rect x="4" y="4" width="2" height="2" />
+      <rect x="2" y="6" width="2" height="4" />
+      <rect x="4" y="10" width="2" height="2" />
+      {/* Middle / */}
+      <rect x="8" y="3" width="2" height="2" opacity="0.7" />
+      <rect x="7" y="5" width="2" height="6" opacity="0.85" />
+      <rect x="6" y="11" width="2" height="2" opacity="0.7" />
+      {/* Right > */}
+      <rect x="10" y="4" width="2" height="2" />
+      <rect x="12" y="6" width="2" height="4" />
+      <rect x="10" y="10" width="2" height="2" />
+    </svg>
+  );
+}
+
+function PixelDataLogo({ className = "h-7 w-7" }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+      style={{ imageRendering: "pixelated" }}
+    >
+      {/* Top disc */}
+      <rect x="4" y="2" width="8" height="1" />
+      <rect x="3" y="3" width="10" height="2" />
+      <rect x="4" y="5" width="8" height="1" opacity="0.5" />
+      {/* Middle tier */}
+      <rect x="3" y="6" width="2" height="3" />
+      <rect x="11" y="6" width="2" height="3" />
+      <rect x="5" y="7" width="6" height="2" opacity="0.7" />
+      <rect x="4" y="9" width="8" height="1" />
+      {/* Bottom tier */}
+      <rect x="3" y="10" width="2" height="3" />
+      <rect x="11" y="10" width="2" height="3" />
+      <rect x="5" y="11" width="6" height="2" opacity="0.7" />
+      <rect x="4" y="13" width="8" height="1" />
+    </svg>
+  );
+}
+
+function PixelAiMlLogo({ className = "h-7 w-7" }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+      style={{ imageRendering: "pixelated" }}
+    >
+      {/* Top / bottom / side pins */}
+      <rect x="5" y="1" width="2" height="2" opacity="0.7" />
+      <rect x="9" y="1" width="2" height="2" opacity="0.7" />
+      <rect x="5" y="13" width="2" height="2" opacity="0.7" />
+      <rect x="9" y="13" width="2" height="2" opacity="0.7" />
+      <rect x="1" y="5" width="2" height="2" opacity="0.7" />
+      <rect x="1" y="9" width="2" height="2" opacity="0.7" />
+      <rect x="13" y="5" width="2" height="2" opacity="0.7" />
+      <rect x="13" y="9" width="2" height="2" opacity="0.7" />
+      {/* Chip frame */}
+      <rect x="3" y="3" width="10" height="2" />
+      <rect x="3" y="11" width="10" height="2" />
+      <rect x="3" y="5" width="2" height="6" />
+      <rect x="11" y="5" width="2" height="6" />
+      {/* Glowing core */}
+      <rect x="6" y="6" width="4" height="4" />
+    </svg>
+  );
+}
+
+function PixelCloudLogo({ className = "h-7 w-7" }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+      style={{ imageRendering: "pixelated" }}
+    >
+      {/* 8-bit cloud body */}
+      <rect x="6" y="3" width="4" height="2" />
+      <rect x="4" y="5" width="8" height="2" />
+      <rect x="2" y="7" width="12" height="4" />
+      <rect x="3" y="11" width="10" height="1" />
+      {/* Pixel server/link dots below */}
+      <rect x="4" y="13" width="2" height="1" opacity="0.65" />
+      <rect x="7" y="13" width="2" height="1" opacity="0.85" />
+      <rect x="10" y="13" width="2" height="1" opacity="0.65" />
+    </svg>
+  );
+}
+
+function UAlbertaPixelCrest({ className = "h-16 w-14" }) {
+  return (
+    <svg
+      viewBox="0 0 20 24"
+      className={className}
+      aria-hidden="true"
+      style={{ imageRendering: "pixelated" }}
+    >
+      {/* Inner UAlberta Green shield field */}
+      <rect x="3" y="2" width="14" height="13" fill="#275D38" />
+      <rect x="4" y="15" width="12" height="2" fill="#275D38" />
+      <rect x="5" y="17" width="10" height="1" fill="#275D38" />
+      <rect x="6" y="18" width="8" height="1" fill="#275D38" />
+      <rect x="7" y="19" width="6" height="1" fill="#275D38" />
+      <rect x="8" y="20" width="4" height="1" fill="#275D38" />
+
+      {/* Deep green lower shadow band for subtle depth */}
+      <rect x="4" y="12" width="12" height="4" fill="#1b4629" />
+      <rect x="6" y="16" width="8" height="4" fill="#1b4629" />
+
+      {/* Gold chief with dancetty (mountain) teeth */}
+      <rect x="3" y="2" width="14" height="4" fill="#FECB00" />
+      <rect x="3" y="6" width="2" height="1" fill="#FECB00" />
+      <rect x="7" y="6" width="2" height="1" fill="#FECB00" />
+      <rect x="11" y="6" width="2" height="1" fill="#FECB00" />
+      <rect x="15" y="6" width="2" height="1" fill="#FECB00" />
+
+      {/* Open book in chief */}
+      <rect x="6" y="3" width="3" height="2" fill="#FFFDF5" />
+      <rect x="11" y="3" width="3" height="2" fill="#FFFDF5" />
+      <rect x="9" y="3" width="2" height="2" fill="#1b4629" />
+      <rect x="6" y="5" width="8" height="1" fill="#1b4629" />
+
+      {/* Silver-white wavy river bar */}
+      <rect x="3" y="9" width="3" height="1" fill="#E6F5EC" />
+      <rect x="8" y="9" width="4" height="1" fill="#E6F5EC" />
+      <rect x="14" y="9" width="3" height="1" fill="#E6F5EC" />
+      <rect x="5" y="10" width="4" height="1" fill="#CBEBD8" />
+      <rect x="11" y="10" width="4" height="1" fill="#CBEBD8" />
+
+      {/* Golden wheat stalks in base */}
+      <rect x="9" y="13" width="2" height="1" fill="#FECB00" />
+      <rect x="9" y="15" width="2" height="1" fill="#FECB00" />
+      <rect x="9" y="17" width="2" height="2" fill="#D9A800" />
+      <rect x="6" y="14" width="2" height="1" fill="#FECB00" />
+      <rect x="7" y="16" width="1" height="1" fill="#D9A800" />
+      <rect x="12" y="14" width="2" height="1" fill="#FECB00" />
+      <rect x="12" y="16" width="1" height="1" fill="#D9A800" />
+
+      {/* Gold shield border */}
+      <rect x="2" y="1" width="16" height="1" fill="#FECB00" />
+      <rect x="2" y="2" width="1" height="13" fill="#FECB00" />
+      <rect x="17" y="2" width="1" height="13" fill="#FECB00" />
+      <rect x="3" y="15" width="1" height="2" fill="#FECB00" />
+      <rect x="16" y="15" width="1" height="2" fill="#FECB00" />
+      <rect x="4" y="17" width="1" height="1" fill="#FECB00" />
+      <rect x="15" y="17" width="1" height="1" fill="#FECB00" />
+      <rect x="5" y="18" width="1" height="1" fill="#FECB00" />
+      <rect x="14" y="18" width="1" height="1" fill="#FECB00" />
+      <rect x="6" y="19" width="1" height="1" fill="#FECB00" />
+      <rect x="13" y="19" width="1" height="1" fill="#FECB00" />
+      <rect x="7" y="20" width="1" height="1" fill="#FECB00" />
+      <rect x="12" y="20" width="1" height="1" fill="#FECB00" />
+      <rect x="8" y="21" width="4" height="1" fill="#FECB00" />
+    </svg>
+  );
+}
+
+const SKILL_CATEGORIES = [
+  {
+    id: "languages",
+    title: "Languages & Frameworks",
+    Logo: PixelCodeLogo,
+    items: [
+      "Python",
+      "SQL",
+      "C",
+      "HTML/CSS",
+      "Java",
+      "JavaScript (Next, React, Node)",
+      "TypeScript",
+    ],
+  },
+  {
+    id: "data",
+    title: "Data",
+    Logo: PixelDataLogo,
+    items: [
+      "PostgreSQL",
+      "SQLite",
+      "GraphQL",
+      "NoSQL",
+      "BigQuery",
+      "Scikit-Learn",
+      "Pandas",
+      "NumPy",
+      "R",
+    ],
+  },
+  {
+    id: "ai-ml",
+    title: "AI & ML",
+    Logo: PixelAiMlLogo,
+    items: [
+      "MCP",
+      "RAG",
+      "Reinforcement Learning",
+      "Claude",
+      "Copilot",
+      "Cursor",
+      "Gemini API",
+      "Ollama",
+      "PyTorch",
+      "TensorFlow",
+    ],
+  },
+  {
+    id: "cloud-devops",
+    title: "Cloud, DevOps, & Tools",
+    Logo: PixelCloudLogo,
+    items: [
+      "Git",
+      "CI/CD",
+      "AWS",
+      "Gradle",
+      "Docker",
+      "Kubernetes",
+      "Linux",
+    ],
+  },
+];
+
+export default function ArcadeIntro({ startTyping = false }) {
+  const [typedCount, setTypedCount] = useState(0);
+
+  useEffect(() => {
+    if (!startTyping) return undefined;
+
+    let frameId = 0;
+    let startDelayTimer = 0;
+
+    // Wait briefly after the boot screen unmounts so the first letter is clearly visible.
+    startDelayTimer = window.setTimeout(() => {
+      const startedAt = performance.now();
+      let lastTyped = 0;
+
+      const tick = (now) => {
+        const elapsed = now - startedAt;
+        const progress = Math.min(1, elapsed / TYPING_DURATION_MS);
+        const nextCount = Math.floor(progress * INTRO_TEXT.length);
+        if (nextCount > lastTyped) {
+          lastTyped = nextCount;
+          if (INTRO_TEXT[nextCount - 1] !== " ") {
+            playKeyBlip();
+          }
+          setTypedCount(nextCount);
+        }
+
+        if (progress < 1) {
+          frameId = window.requestAnimationFrame(tick);
+        } else {
+          setTypedCount(INTRO_TEXT.length);
+        }
+      };
+
+      frameId = window.requestAnimationFrame(tick);
+    }, 120);
+
+    return () => {
+      window.clearTimeout(startDelayTimer);
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [startTyping]);
+
+  const displayedIntro = INTRO_TEXT.slice(0, typedCount);
+
+  return (
+    <header
+      id="intro"
+      className="arcade-screen relative mx-auto w-full max-w-[59rem] px-6 pb-8 pt-10 text-left"
+    >
       <div className="absolute left-2 top-2 h-6 w-6 border-l-2 border-t-2 border-amber-500/50" />
       <div className="absolute right-2 top-2 h-6 w-6 border-r-2 border-t-2 border-amber-500/50" />
       <div className="absolute bottom-4 left-2 h-6 w-6 border-b-2 border-l-2 border-amber-500/50" />
       <div className="absolute bottom-4 right-2 h-6 w-6 border-b-2 border-r-2 border-amber-500/50" />
 
-      <p
-        className="mb-3 text-[10px] uppercase tracking-[0.35em] text-amber-400/90"
-        style={{ fontFamily: '"Press Start 2P", cursive' }}
-      >
-        SWE · ML · Data · Web · Search
-      </p>
-      <h1
-        className="mb-4 text-[16px] leading-relaxed text-white"
-        style={{ fontFamily: '"Press Start 2P", cursive' }}
-      >
-        ADNAN JASIM | SOFTWARE ENGINEER
-      </h1>
-      <p className="arcade-body mx-auto mb-2 max-w-md text-[13px] leading-relaxed tracking-wide text-white/85">
-        CS at UAlberta.
-      </p>
-      <p className="arcade-body mx-auto mb-8 max-w-md text-[12px] leading-relaxed tracking-wide text-white/60">
-        Pick a title and read the stack.
-      </p>
-
-      <div className="my-6 flex justify-center gap-2">
-        <span className="h-0.5 w-12 bg-amber-500/40" />
-        <span
-          className="text-[8px] text-amber-500/60"
-          style={{ fontFamily: '"Press Start 2P", cursive' }}
+      <div className="relative mb-8">
+        <h1
+          aria-label={INTRO_TEXT}
+          className="invisible select-none text-[22px] leading-relaxed sm:text-[29px]"
+          style={PIXEL_FONT}
         >
-          {" "}
-          UALBERTA{" "}
-        </span>
-        <span className="h-0.5 w-12 bg-amber-500/40" />
+          {INTRO_TEXT}
+          <span className="ml-2 inline-block h-[0.85em] w-[0.55em]" />
+        </h1>
+        <p
+          aria-hidden="true"
+          className="absolute inset-0 text-[22px] leading-relaxed text-white sm:text-[29px]"
+          style={PIXEL_FONT}
+        >
+          {displayedIntro}
+          <span className="arcade-boot__blink ml-2 inline-block h-[0.85em] w-[0.55em] bg-amber-400 align-middle" />
+        </p>
       </div>
 
-      <div className="grid gap-4 text-left sm:grid-cols-3">
-        <div className="rounded border-2 border-white/20 bg-black/60 p-4 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
-          <p
-            className="mb-2 text-[10px] text-amber-400/90"
-            style={{ fontFamily: '"Press Start 2P", cursive' }}
+      {/* Skills grid */}
+      <section id="skills" aria-labelledby="skills-heading" className="text-left">
+        <div className="mb-5 flex items-center justify-center gap-3">
+          <span className="h-0.5 w-14 bg-amber-500/40" />
+          <h2
+            id="skills-heading"
+            className="text-[11.5px] uppercase tracking-[0.25em] text-amber-400/95 sm:text-[14px]"
+            style={PIXEL_FONT}
           >
-            FOCUS
-          </p>
-          <p className="arcade-body text-[12px] leading-relaxed tracking-wide text-white/80">
-            SWE, ML, Data, Full-Stack, and Search.
-          </p>
+            SKILLS
+          </h2>
+          <span className="h-0.5 w-14 bg-amber-500/40" />
         </div>
-        <div className="rounded border-2 border-white/20 bg-black/60 p-4 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
-          <p
-            className="mb-2 text-[10px] text-amber-400/90"
-            style={{ fontFamily: '"Press Start 2P", cursive' }}
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          {SKILL_CATEGORIES.map((category) => {
+            const Logo = category.Logo;
+            return (
+              <div
+                key={category.id}
+                className="group relative rounded border-2 border-white/20 bg-black/65 p-5 shadow-[0_10px_24px_rgba(0,0,0,0.45),inset_0_0_24px_rgba(0,0,0,0.55)] transition-all duration-200 hover:-translate-y-0.5 hover:border-amber-400/80 hover:bg-gradient-to-b hover:from-amber-950/35 hover:to-black/85 hover:shadow-[0_14px_30px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(251,191,36,0.2)]"
+              >
+                <div className="mb-3.5 flex items-center gap-3">
+                  <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded border-2 border-amber-500/45 bg-black/80 text-amber-400 shadow-[inset_0_2px_8px_rgba(0,0,0,0.85)] transition-all duration-200 group-hover:scale-110 group-hover:border-amber-300 group-hover:bg-amber-400 group-hover:text-black group-hover:shadow-[0_6px_16px_rgba(251,191,36,0.3)]">
+                    <Logo className="h-6 w-6 transition-transform duration-200 group-hover:scale-105" />
+                  </div>
+                  <h3
+                    className="text-[11.5px] leading-snug text-amber-300/95 transition-colors duration-200 group-hover:text-amber-200 sm:text-[13px]"
+                    style={PIXEL_FONT}
+                  >
+                    {category.title}
+                  </h3>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5">
+                  {category.items.map((skill) => (
+                    <span
+                      key={skill}
+                      onMouseEnter={() => playHover()}
+                      className="arcade-body cursor-default rounded border border-white/15 bg-black/80 px-2.5 py-0.5 text-[12.5px] font-medium leading-snug text-white/85 transition-all duration-150 hover:-translate-y-0.5 hover:border-amber-300 hover:bg-amber-400 hover:text-black hover:shadow-[0_4px_12px_rgba(251,191,36,0.28)] sm:text-[14px]"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Education section */}
+      <section id="education" aria-labelledby="education-heading" className="mt-8 text-left">
+        <div className="mb-5 flex items-center justify-center gap-3">
+          <span className="h-0.5 w-14 bg-amber-500/40" />
+          <h2
+            id="education-heading"
+            className="text-[11.5px] uppercase tracking-[0.25em] text-amber-400/95 sm:text-[14px]"
+            style={PIXEL_FONT}
           >
-            WHAT I LIKE
-          </p>
-          <p className="arcade-body text-[12px] leading-relaxed tracking-wide text-white/80">
-            Systems thinking and clean design.
-          </p>
+            EDUCATION
+          </h2>
+          <span className="h-0.5 w-14 bg-amber-500/40" />
         </div>
-        <div className="rounded border-2 border-white/20 bg-black/60 p-4 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
-          <p
-            className="mb-2 text-[10px] text-amber-400/90"
-            style={{ fontFamily: '"Press Start 2P", cursive' }}
-          >
-            LOOKING FOR
-          </p>
-          <p className="arcade-body text-[12px] leading-relaxed tracking-wide text-white/80">
-            Roles in SWE, ML, and Data.
-          </p>
+
+        <div className="rounded border-2 border-[#275D38] bg-gradient-to-b from-[#0b2919] via-[#071c11] to-[#04120b] p-5 text-left shadow-[0_14px_30px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(254,203,0,0.14)]">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded border-2 border-[#275D38] bg-[#04120b] shadow-[inset_0_2px_10px_rgba(0,0,0,0.85)]">
+              <UAlbertaPixelCrest className="h-14 w-12" />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+                <h3
+                  className="text-[15px] leading-snug tracking-wide text-[#FECB00] sm:text-[17px]"
+                  style={PIXEL_FONT}
+                >
+                  University of Alberta
+                </h3>
+                <p className="arcade-body shrink-0 text-[14.5px] font-medium tabular-nums text-[#a7d4ba] sm:text-[16px]">
+                  Sep 2022 – Dec 2026
+                </p>
+              </div>
+
+              <p className="arcade-body mt-1.5 text-[17px] font-semibold leading-snug tracking-wide text-[#f3faf5] sm:text-[19px]">
+                Bachelor of Science (BS), Computer Science
+              </p>
+
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[#275D38]/80 pt-2.5">
+                <p className="arcade-body text-[15px] text-[#b7dec8] sm:text-[17px]">
+                  <span className="font-semibold tabular-nums text-[#FECB00]">3.6</span>{" "}
+                  GPA
+                </p>
+                <span className="text-[#275D38]" aria-hidden="true">
+                  |
+                </span>
+                <p className="arcade-body text-[15px] font-medium text-[#e6f5ec] sm:text-[17px]">
+                  Faculty of Science Dean&apos;s Honor Roll
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
     </header>
   );
 }
