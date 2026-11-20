@@ -11,6 +11,7 @@ import ArcadePageFrame from "./components/ArcadePageFrame";
 import ArcadeSidePanels from "./components/ArcadeSidePanels";
 import ChessEngineEmbed from "./components/ChessEngineEmbed";
 import PortfolioOsSection from "./components/PortfolioOsSection";
+import { GitHubPixelLogo } from "./components/SocialPixelIcons";
 import { PROJECTS } from "./data/projects";
 import {
   playClose,
@@ -413,10 +414,11 @@ function App() {
                       href={activeProjectData.githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-block rounded border-2 border-amber-500/80 bg-amber-950/50 px-3.5 py-2 text-[10px] uppercase text-amber-400 hover:bg-amber-500/20"
+                      className="inline-flex items-center gap-2 rounded border-2 border-amber-500/80 bg-amber-950/50 px-3.5 py-2 text-[10px] uppercase text-amber-400 hover:bg-amber-500/20"
                       style={PIXEL_FONT}
                     >
-                      View on GitHub
+                      <GitHubPixelLogo className="h-4 w-4 shrink-0" />
+                      <span>View on GitHub</span>
                     </a>
                   )}
                   {activeProjectData.liveUrl && (

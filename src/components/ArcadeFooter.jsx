@@ -2,6 +2,7 @@
  * Arcade-style footer with social links.
  */
 import { GITHUB_URL, LINKEDIN_URL } from "../social";
+import { GitHubPixelLogo, LinkedInPixelLogo } from "./SocialPixelIcons";
 
 export default function ArcadeFooter() {
   return (
@@ -23,19 +24,21 @@ export default function ArcadeFooter() {
           href={GITHUB_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded border-2 border-amber-500/60 bg-amber-950/40 px-5 py-2.5 text-[14px] uppercase text-amber-300 hover:bg-amber-500/20"
+          className="inline-flex items-center gap-2.5 rounded border-2 border-amber-500/60 bg-amber-950/40 px-5 py-2.5 text-[14px] uppercase text-amber-300 hover:bg-amber-500/20"
           style={{ fontFamily: '"Press Start 2P", cursive' }}
         >
-          GitHub
+          <GitHubPixelLogo className="h-5 w-5 shrink-0" />
+          <span>GitHub</span>
         </a>
         <a
           href={LINKEDIN_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded border-2 border-amber-500/60 bg-amber-950/40 px-5 py-2.5 text-[14px] uppercase text-amber-300 hover:bg-amber-500/20"
+          className="inline-flex items-center gap-2.5 rounded border-2 border-amber-500/60 bg-amber-950/40 px-5 py-2.5 text-[14px] uppercase text-amber-300 hover:bg-amber-500/20"
           style={{ fontFamily: '"Press Start 2P", cursive' }}
         >
-          LinkedIn
+          <LinkedInPixelLogo className="h-5 w-5 shrink-0" />
+          <span>LinkedIn</span>
         </a>
       </div>
 

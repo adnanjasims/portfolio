@@ -2,6 +2,7 @@
  * Top marquee strip, social links, SFX toggle, and frame around main content.
  */
 import { GITHUB_URL, LINKEDIN_URL } from "../social";
+import { GitHubPixelLogo, LinkedInPixelLogo } from "./SocialPixelIcons";
 
 const PIXEL_FONT = { fontFamily: '"Press Start 2P", cursive' };
 
@@ -64,26 +65,28 @@ export default function ArcadePageFrame({
 
   return (
     <div className="relative flex min-h-screen w-full flex-col">
-      <div className="relative z-10 flex shrink-0 items-center justify-between gap-3 border-b-4 border-amber-500/50 bg-gradient-to-b from-amber-950/80 to-black px-4 py-3">
+      <div className="relative z-10 flex shrink-0 items-center justify-between gap-2 border-b-4 border-amber-500/50 bg-gradient-to-b from-amber-950/80 to-black px-4 py-3 sm:grid sm:grid-cols-[1fr_auto_1fr]">
         <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent_0px,transparent_20px,rgba(251,191,36,0.03)_20px,rgba(251,191,36,0.03)_22px)]" />
-        <div className="relative z-10 flex items-center gap-4">
+        <div className="relative z-10 flex items-center gap-3 justify-self-start sm:gap-4">
           <a
             href={GITHUB_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[8px] uppercase tracking-widest text-amber-400/90 hover:text-amber-200 sm:text-[9px]"
+            className="inline-flex items-center gap-1.5 text-[8px] uppercase tracking-widest text-amber-400/90 hover:text-amber-200 sm:text-[9px]"
             style={PIXEL_FONT}
           >
-            GitHub
+            <GitHubPixelLogo className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+            <span>GitHub</span>
           </a>
           <a
             href={LINKEDIN_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[8px] uppercase tracking-widest text-amber-400/90 hover:text-amber-200 sm:text-[9px]"
+            className="inline-flex items-center gap-1.5 text-[8px] uppercase tracking-widest text-amber-400/90 hover:text-amber-200 sm:text-[9px]"
             style={PIXEL_FONT}
           >
-            LinkedIn
+            <LinkedInPixelLogo className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+            <span>LinkedIn</span>
           </a>
         </div>
 
@@ -96,14 +99,14 @@ export default function ArcadePageFrame({
               scrollToProjects();
             }
           }}
-          className="arcade-marquee-pulse relative z-10 cursor-pointer border-none bg-transparent p-0 text-center text-[10px] font-black uppercase tracking-[0.45em] text-amber-400/95 drop-shadow-[0_0_12px_rgba(251,191,36,0.4)] transition hover:text-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:ring-offset-2 focus:ring-offset-black sm:text-[12px]"
+          className="arcade-marquee-pulse relative z-10 cursor-pointer justify-self-center whitespace-nowrap border-none bg-transparent p-0 text-center text-[10px] font-black uppercase tracking-[0.28em] text-amber-400/95 drop-shadow-[0_0_12px_rgba(251,191,36,0.4)] transition hover:text-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:ring-offset-2 focus:ring-offset-black sm:text-[12px] sm:tracking-[0.45em]"
           style={PIXEL_FONT}
           aria-label="Press start to scroll to projects"
         >
           PRESS START
         </button>
 
-        <div className="relative z-10 flex items-center gap-2">
+        <div className="relative z-10 flex items-center gap-2 justify-self-end">
           {overclockUnlocked && (
             <button
               type="button"

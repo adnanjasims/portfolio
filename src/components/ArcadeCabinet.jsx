@@ -2,6 +2,28 @@ import { useEffect, useRef, useState } from "react";
 
 const PIXEL_FONT = { fontFamily: '"Press Start 2P", cursive' };
 
+function PixelCoinSprite() {
+  return (
+    <svg
+      viewBox="0 0 12 12"
+      className="h-4 w-4 drop-shadow-[0_0_6px_rgba(251,191,36,0.75)]"
+      shapeRendering="crispEdges"
+      aria-hidden="true"
+      style={{ imageRendering: "pixelated" }}
+    >
+      <rect x="3" y="1" width="6" height="1" fill="#fef08a" />
+      <rect x="2" y="2" width="8" height="8" fill="#fbbf24" />
+      <rect x="3" y="10" width="6" height="1" fill="#d97706" />
+      <rect x="1" y="3" width="1" height="6" fill="#fef08a" />
+      <rect x="10" y="3" width="1" height="6" fill="#d97706" />
+      {/* Inner pixel coin glint & bar */}
+      <rect x="5" y="3" width="2" height="6" fill="#fef9c3" />
+      <rect x="4" y="4" width="1" height="4" fill="#b45309" />
+      <rect x="7" y="4" width="1" height="4" fill="#b45309" />
+    </svg>
+  );
+}
+
 /**
  * Retro arcade cabinet: detailed bezel, CRT-style screen (pixel grid, scanlines),
  * interactive two-player control panel (4-way stick + B/A/GO + COIN + shortcuts).
@@ -18,6 +40,7 @@ export default function ArcadeCabinet({
 }) {
   const [stickDir, setStickDir] = useState(""); // up | down | left | right | ""
   const [coinFlash, setCoinFlash] = useState(false);
+  const [coinDropId, setCoinDropId] = useState(0);
   const stickTimerRef = useRef(null);
   const coinTimerRef = useRef(null);
 
@@ -38,9 +61,10 @@ export default function ArcadeCabinet({
 
   const handleCoin = () => {
     setCoinFlash(true);
+    setCoinDropId((id) => id + 1);
     onInsertCoin?.();
     if (coinTimerRef.current) window.clearTimeout(coinTimerRef.current);
-    coinTimerRef.current = window.setTimeout(() => setCoinFlash(false), 450);
+    coinTimerRef.current = window.setTimeout(() => setCoinFlash(false), 520);
   };
 
   const stickOffsetClass =
@@ -235,15 +259,33 @@ export default function ArcadeCabinet({
             type="button"
             onClick={handleCoin}
             title="Insert coin"
-            className="group flex cursor-pointer flex-col items-center gap-1 rounded px-2 py-1 transition hover:bg-white/5 active:translate-y-0.5 focus:outline-none focus:ring-1 focus:ring-amber-400/60"
+            className="group relative flex cursor-pointer flex-col items-center gap-1 rounded px-3 py-1 transition hover:bg-white/5 active:translate-y-0.5 focus:outline-none focus:ring-1 focus:ring-amber-400/60"
           >
-            <div
-              className={`h-2.5 w-10 rounded-none border-2 transition ${
-                coinFlash
-                  ? "border-amber-400 bg-amber-400/40 shadow-[0_0_10px_rgba(251,191,36,0.6)]"
-                  : "border-[#3a3a4a] bg-[#1a1a24] group-hover:border-amber-400/60"
-              }`}
-            />
+            <div className="relative flex items-center justify-center">
+              {/* Clipped vertical coin-drop chute terminating inside the recessed slot */}
+              {coinFlash && coinDropId > 0 && (
+                <div className="pointer-events-none absolute bottom-[3px] left-1/2 z-20 flex h-9 w-8 -translate-x-1/2 items-end justify-center overflow-hidden">
+                  <div key={coinDropId} className="coin-insert-anim">
+                    <PixelCoinSprite />
+                  </div>
+                </div>
+              )}
+
+              {/* Recessed arcade coin slot bezel + dark inner slit */}
+              <div
+                className={`relative z-10 flex h-3 w-11 items-center justify-center rounded-none border-2 transition ${
+                  coinFlash
+                    ? "border-amber-400 bg-amber-950/80 shadow-[0_0_12px_rgba(251,191,36,0.65)]"
+                    : "border-[#3a3a4a] bg-[#1a1a24] group-hover:border-amber-400/60"
+                }`}
+              >
+                <span
+                  className={`h-1 w-7 transition-colors ${
+                    coinFlash ? "bg-amber-300/80" : "bg-black"
+                  }`}
+                />
+              </div>
+            </div>
             <span
               className={`text-[8px] uppercase transition ${
                 coinFlash ? "text-amber-300" : "text-slate-400 group-hover:text-amber-300"

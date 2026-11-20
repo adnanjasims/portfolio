@@ -53,6 +53,40 @@ function playTone(freq, durationMs, type = "square", volume = 0.04, delayMs = 0)
   osc.stop(stopTime + 0.01);
 }
 
+function playNoiseBurst(durationMs, filterFreq = 2400, volume = 0.035, delayMs = 0) {
+  if (!sfxEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const sampleCount = Math.max(1, Math.floor((ctx.sampleRate * durationMs) / 1000));
+  const buffer = ctx.createBuffer(1, sampleCount, ctx.sampleRate);
+  const channel = buffer.getChannelData(0);
+  for (let i = 0; i < sampleCount; i += 1) {
+    channel[i] = Math.random() * 2 - 1;
+  }
+
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+
+  const filter = ctx.createBiquadFilter();
+  filter.type = "highpass";
+  filter.frequency.setValueAtTime(filterFreq, ctx.currentTime);
+
+  const startTime = ctx.currentTime + delayMs / 1000;
+  const stopTime = startTime + durationMs / 1000;
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(volume, startTime);
+  gain.gain.exponentialRampToValueAtTime(0.0001, stopTime);
+
+  source.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  source.start(startTime);
+  source.stop(stopTime + 0.01);
+}
+
 export function playKeyBlip() {
   playTone(760, 18, "square", 0.015);
 }
@@ -77,8 +111,14 @@ export function playClose() {
 }
 
 export function playCoin() {
-  playTone(987.77, 70, "square", 0.045);
-  playTone(1318.51, 220, "square", 0.045, 70);
+  // "Ka-" mechanical coin-slot strike & metallic clink
+  playNoiseBurst(36, 2200, 0.04, 0);
+  playTone(987.77, 36, "triangle", 0.042, 0);
+  // "-CHING!" shimmering double-bell register ring
+  playTone(1318.51, 55, "square", 0.036, 52);
+  playTone(1567.98, 290, "triangle", 0.052, 102);
+  playTone(2093.0, 230, "square", 0.022, 104);
+  playTone(3135.96, 310, "sine", 0.026, 110);
 }
 
 export function playOverclock() {
