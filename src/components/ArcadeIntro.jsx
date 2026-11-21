@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { playHover, playKeyBlip, playSelect } from "../utils/arcadeSfx";
 import { SkillPixelIcon } from "./SkillPixelIcons";
 
@@ -257,13 +257,8 @@ const SKILL_CATEGORIES = [
 export default function ArcadeIntro({ startTyping = false }) {
   const [typedCount, setTypedCount] = useState(0);
   const [introArmed, setIntroArmed] = useState(false);
-  const [cursorPulseKey, setCursorPulseKey] = useState(0);
   const [gagCount, setGagCount] = useState(0);
   const introBoxRef = useRef(null);
-
-  const pulseCursor = useCallback(() => {
-    setCursorPulseKey((k) => k + 1);
-  }, []);
 
   useEffect(() => {
     if (!startTyping) return undefined;
@@ -329,7 +324,6 @@ export default function ArcadeIntro({ startTyping = false }) {
         setTypedCount(INTRO_TEXT.length);
         setGagCount((prev) => Math.min(INTRO_GAG_TEXT.length, prev + 1));
         playKeyBlip();
-        pulseCursor();
       }
     };
 
@@ -339,11 +333,10 @@ export default function ArcadeIntro({ startTyping = false }) {
       document.removeEventListener("pointerdown", onDocPointerDown);
       window.removeEventListener("keydown", onWindowKeyDown, { capture: true });
     };
-  }, [introArmed, pulseCursor]);
+  }, [introArmed]);
 
   const handleArmIntro = () => {
     setIntroArmed(true);
-    pulseCursor();
     playSelect();
     introBoxRef.current?.focus({ preventScroll: true });
   };
@@ -357,7 +350,7 @@ export default function ArcadeIntro({ startTyping = false }) {
   return (
     <header
       id="intro"
-      className="arcade-screen relative mx-auto w-full max-w-[59rem] px-6 pb-8 pt-10 text-left"
+      className="arcade-screen relative mx-auto w-full max-w-[65.5rem] px-4 pb-8 pt-10 text-left sm:px-5"
     >
       <div className="absolute left-2 top-2 h-6 w-6 border-l-2 border-t-2 border-amber-500/50" />
       <div className="absolute right-2 top-2 h-6 w-6 border-r-2 border-t-2 border-amber-500/50" />
@@ -371,11 +364,10 @@ export default function ArcadeIntro({ startTyping = false }) {
         role="textbox"
         aria-readonly="true"
         aria-label={INTRO_TEXT}
-        className={`relative mb-8 cursor-text rounded px-2.5 py-2 transition-colors focus:outline-none ${
-          introArmed
-            ? "bg-[#040e24]/85 ring-2 ring-[#1e40af] shadow-[inset_0_0_24px_rgba(2,8,24,0.9),0_0_16px_rgba(30,64,175,0.28)]"
-            : "hover:bg-[#040d21]/45"
-        }`}
+        className={`relative mb-8 cursor-text rounded px-2.5 py-2 transition-colors focus:outline-none ${introArmed
+          ? "bg-[#040e24]/85 ring-2 ring-[#1e40af] shadow-[inset_0_0_24px_rgba(2,8,24,0.9),0_0_16px_rgba(30,64,175,0.28)]"
+          : "hover:bg-[#040d21]/45"
+          }`}
       >
         <div className="relative">
           <h1
@@ -394,40 +386,21 @@ export default function ArcadeIntro({ startTyping = false }) {
             {displayedIntro}
             {gagCount === 0 && (
               <span
-                key={`cursor-main-${cursorPulseKey}`}
-                className={`ml-2 inline-block align-middle ${
-                  cursorPulseKey > 0 ? "intro-cursor-detected" : ""
-                }`}
-              >
-                <span className={`intro-cursor-blink block h-[0.85em] w-[0.55em] ${cursorStyleClass}`} />
-              </span>
+                className={`intro-cursor-blink ml-2 inline-block h-[0.85em] w-[0.55em] align-middle ${cursorStyleClass}`}
+              />
             )}
           </p>
         </div>
 
-        {(introArmed || gagCount > 0) && (
+        {gagCount > 0 && (
           <div className="mt-2.5 flex min-h-[20px] items-center gap-2">
-            {gagCount > 0 ? (
-              <p className="arcade-body text-[13px] text-sky-200 sm:text-[15px]">
-                <span className="mr-1.5 text-amber-400">&gt;</span>
-                {displayedGag}
-                <span
-                  key={`cursor-gag-${cursorPulseKey}`}
-                  className={`ml-1.5 inline-block align-middle ${
-                    cursorPulseKey > 0 ? "intro-cursor-detected" : ""
-                  }`}
-                >
-                  <span className={`intro-cursor-blink block h-[0.95em] w-[0.55em] ${cursorStyleClass}`} />
-                </span>
-              </p>
-            ) : (
+            <p className="arcade-body text-[13px] text-sky-200 sm:text-[15px]">
+              <span className="mr-1.5 text-amber-400">&gt;</span>
+              {displayedGag}
               <span
-                key={`hint-${cursorPulseKey}`}
-                className="arcade-body intro-cursor-detected text-[11px] text-sky-300/85"
-              >
-                &gt; cursor locked in...
-              </span>
-            )}
+                className={`intro-cursor-blink ml-1.5 inline-block h-[0.95em] w-[0.55em] align-middle ${cursorStyleClass}`}
+              />
+            </p>
           </div>
         )}
       </div>
@@ -520,7 +493,7 @@ export default function ArcadeIntro({ startTyping = false }) {
               </div>
 
               <p className="arcade-body mt-1.5 text-[17px] font-semibold leading-snug tracking-wide text-[#f3faf5] sm:text-[19px]">
-                Bachelor of Science (BS), Computer Science
+                Bachelor of Science (B.Sc.), Computer Science
               </p>
 
               <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[#275D38]/80 pt-2.5">

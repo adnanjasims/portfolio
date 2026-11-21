@@ -52,6 +52,27 @@ export default function ArcadeFooter() {
         React · Vite · Tailwind · Kaboom
       </p>
 
+      <div className="mx-auto mt-6 inline-block rounded border-2 border-white/20 bg-black/60 px-5 py-3 text-center">
+        <p
+          className="text-[9px] text-white/75"
+          style={{ fontFamily: '"Press Start 2P", cursive' }}
+        >
+          HOME BASE
+        </p>
+        <p
+          className="mt-2 text-[8px] leading-relaxed text-white/65"
+          style={{ fontFamily: '"Press Start 2P", cursive' }}
+        >
+          UALBERTA
+        </p>
+        <p
+          className="mt-1 text-[8px] leading-relaxed text-white/50"
+          style={{ fontFamily: '"Press Start 2P", cursive' }}
+        >
+          CS · EDMONTON
+        </p>
+      </div>
+
       <div className="mt-6 flex flex-wrap justify-center gap-5">
         <span
           className="text-[12px] text-white/50"

@@ -254,8 +254,8 @@ function collectFiles(node, basePath = []) {
 }
 
 const INITIAL_WINDOWS = {
-  terminal: { id: "terminal", title: "TERMINAL", open: true, minimized: false, x: 145, y: 18, w: 500, h: 330, z: 3 },
-  files: { id: "files", title: "FILES", open: true, minimized: false, x: 660, y: 24, w: 235, h: 255, z: 2 },
+  terminal: { id: "terminal", title: "TERMINAL", open: false, minimized: false, x: 145, y: 18, w: 500, h: 330, z: 3 },
+  files: { id: "files", title: "FILES", open: false, minimized: false, x: 660, y: 24, w: 235, h: 255, z: 2 },
   notepad: { id: "notepad", title: "NOTEBAD", open: false, minimized: false, x: 210, y: 48, w: 430, h: 300, z: 4 },
   paint: { id: "paint", title: "PAINT", open: false, minimized: false, x: 240, y: 42, w: 430, h: 325, z: 4 },
   snake: { id: "snake", title: "SNAKE.EXE", open: false, minimized: false, x: 260, y: 36, w: 390, h: 330, z: 4 },
@@ -1327,9 +1327,9 @@ export default function PortfolioOsSection({
   const explorerItems =
     explorerDir?.type === "dir"
       ? Object.entries(explorerDir.children).sort(([aName, aNode], [bName, bNode]) => {
-          if (aNode.type !== bNode.type) return aNode.type === "dir" ? -1 : 1;
-          return aName.localeCompare(bName);
-        })
+        if (aNode.type !== bNode.type) return aNode.type === "dir" ? -1 : 1;
+        return aName.localeCompare(bName);
+      })
       : [];
 
   const noteWordCount = noteText.trim() ? noteText.trim().split(/\s+/).length : 0;
@@ -1347,17 +1347,16 @@ export default function PortfolioOsSection({
             {lines.map((entry, idx) => (
               <pre
                 key={idx}
-                className={`whitespace-pre-wrap break-words ${
-                  entry.type === "prompt"
-                    ? "text-amber-300"
-                    : entry.type === "accent"
-                      ? "text-emerald-300"
-                      : entry.type === "error"
-                        ? "text-rose-400"
-                        : entry.type === "muted"
-                          ? "text-white/50"
-                          : "text-white/85"
-                }`}
+                className={`whitespace-pre-wrap break-words ${entry.type === "prompt"
+                  ? "text-amber-300"
+                  : entry.type === "accent"
+                    ? "text-emerald-300"
+                    : entry.type === "error"
+                      ? "text-rose-400"
+                      : entry.type === "muted"
+                        ? "text-white/50"
+                        : "text-white/85"
+                  }`}
               >
                 {entry.text}
               </pre>
@@ -1530,11 +1529,10 @@ export default function PortfolioOsSection({
                   }}
                   style={{ backgroundColor: c.hex }}
                   title={c.name}
-                  className={`h-4 w-4 cursor-pointer rounded-sm border transition ${
-                    paintColor === c.hex
-                      ? "scale-125 border-white shadow-[0_0_6px_rgba(255,255,255,0.6)]"
-                      : "border-white/30"
-                  }`}
+                  className={`h-4 w-4 cursor-pointer rounded-sm border transition ${paintColor === c.hex
+                    ? "scale-125 border-white shadow-[0_0_6px_rgba(255,255,255,0.6)]"
+                    : "border-white/30"
+                    }`}
                 />
               ))}
             </div>
@@ -1779,7 +1777,7 @@ export default function PortfolioOsSection({
     <section
       id="os"
       aria-labelledby="os-heading"
-      className="arcade-screen relative mx-auto w-full max-w-[59rem] px-6 py-6"
+      className="arcade-screen relative mx-auto w-full max-w-[65.5rem] px-4 py-6 sm:px-5"
     >
       <div className="mb-5 flex items-center justify-center gap-3">
         <span className="h-0.5 w-14 bg-amber-500/40" />
@@ -1801,112 +1799,262 @@ export default function PortfolioOsSection({
         <div
           ref={desktopRef}
           onClick={() => setStartMenuOpen(false)}
-          className="relative flex min-h-[490px] flex-col justify-between overflow-hidden rounded border-2 border-emerald-700/60 bg-[#040a07] shadow-[inset_0_0_45px_rgba(0,0,0,0.85)]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(52,211,153,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(52,211,153,0.04) 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
+          className="relative flex min-h-[490px] flex-col justify-between overflow-hidden rounded border-2 border-sky-700/55 bg-[#07142b] shadow-[inset_0_0_45px_rgba(0,0,0,0.85)]"
         >
-          {/* Mobile quick launcher bar (< md) */}
-          <div className="relative z-10 flex flex-wrap gap-2 p-3 md:hidden">
-            {desktopIcons.map((item) => {
-              const Icon = item.Icon;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={item.onOpen}
-                  className={`flex cursor-pointer flex-col items-center gap-1 rounded p-2 transition focus:outline-none ${item.color}`}
-                >
-                  <Icon className="h-6 w-6" />
-                  <span className="text-[7px]" style={PIXEL_FONT}>{item.label}</span>
-                </button>
-              );
-            })}
+          {/* Pixelized Dusky-Navy Twilight Bliss Wallpaper (160x98 crisp pixel art) */}
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+            <svg
+              viewBox="0 0 160 98"
+              preserveAspectRatio="none"
+              shapeRendering="crispEdges"
+              className="h-full w-full"
+              style={{ imageRendering: "pixelated" }}
+            >
+              {/* Stepped dusky navy sky bands (top dark zenith to hazy periwinkle horizon) */}
+              <rect x="0" y="0" width="160" height="8" fill="#040c1f" />
+              <rect x="0" y="8" width="160" height="7" fill="#06122c" />
+              <rect x="0" y="15" width="160" height="7" fill="#081a3d" />
+              <rect x="0" y="22" width="160" height="7" fill="#0c224f" />
+              <rect x="0" y="29" width="160" height="7" fill="#102b61" />
+              <rect x="0" y="36" width="160" height="6" fill="#153573" />
+              <rect x="0" y="42" width="160" height="6" fill="#1b4185" />
+              <rect x="0" y="48" width="160" height="5" fill="#234e96" />
+              <rect x="0" y="53" width="160" height="5" fill="#2d5ba6" />
+              <rect x="0" y="58" width="160" height="6" fill="#3a6ab5" />
+
+              {/* Dithered sky transition strips for 16-bit VGA banding */}
+              <g fill="#102b61" opacity="0.45">
+                <rect x="0" y="21" width="160" height="1" />
+                <rect x="0" y="28" width="160" height="1" />
+              </g>
+              <g fill="#234e96" opacity="0.45">
+                <rect x="0" y="41" width="160" height="1" />
+                <rect x="0" y="47" width="160" height="1" />
+              </g>
+
+              {/* Iconic Bliss upper-right sweeping cumulus cloud bank (multi-shade twilight blue/silver) */}
+              {/* Deep cloud base shadows */}
+              <g fill="#193366">
+                <rect x="52" y="24" width="38" height="4" />
+                <rect x="74" y="18" width="46" height="6" />
+                <rect x="92" y="12" width="44" height="7" />
+                <rect x="114" y="8" width="34" height="5" />
+                <rect x="18" y="36" width="28" height="3" />
+                <rect x="118" y="34" width="32" height="4" />
+              </g>
+              {/* Mid twilight cloud body */}
+              <g fill="#2b4c87">
+                <rect x="56" y="22" width="34" height="4" />
+                <rect x="76" y="16" width="42" height="6" />
+                <rect x="94" y="10" width="40" height="7" />
+                <rect x="116" y="6" width="28" height="5" />
+                <rect x="20" y="34" width="24" height="3" />
+                <rect x="122" y="32" width="26" height="4" />
+              </g>
+              {/* Upper periwinkle sunlit cloud puffs */}
+              <g fill="#4167a6">
+                <rect x="62" y="21" width="24" height="2" />
+                <rect x="80" y="14" width="34" height="5" />
+                <rect x="98" y="9" width="32" height="5" />
+                <rect x="119" y="5" width="20" height="4" />
+                <rect x="24" y="33" width="16" height="2" />
+                <rect x="126" y="31" width="18" height="2" />
+              </g>
+              {/* Crisp bright twilight cloud crests */}
+              <g fill="#5e85c4">
+                <rect x="86" y="13" width="20" height="3" />
+                <rect x="103" y="8" width="22" height="3" />
+                <rect x="122" y="4" width="12" height="2" />
+                <rect x="28" y="33" width="8" height="1" />
+              </g>
+              <g fill="#7fa5de" opacity="0.85">
+                <rect x="92" y="13" width="10" height="1" />
+                <rect x="108" y="8" width="12" height="1" />
+                <rect x="124" y="4" width="6" height="1" />
+              </g>
+
+              {/* Distant misty right-hand Bliss ridge (blue-green atmospheric perspective) */}
+              <polygon
+                points="68,64 82,58 98,54 116,51 134,48 150,46 160,46 160,78 68,78"
+                fill="#11363c"
+              />
+              <polygon
+                points="76,65 92,59 110,55 130,52 148,50 160,50 160,78 76,78"
+                fill="#0d2c2e"
+              />
+              {/* Soft hazy rim along distant ridge */}
+              <rect x="132" y="48" width="18" height="1" fill="#1b4d52" />
+              <rect x="148" y="46" width="12" height="1" fill="#1b4d52" />
+              <rect x="108" y="51" width="16" height="1" fill="#17444a" />
+              <rect x="94" y="54" width="14" height="1" fill="#17444a" />
+
+              {/* Dominant sweeping foreground Bliss meadow hill (left crest -> right valley, 7 green shades) */}
+              {/* Base shadow meadow */}
+              <polygon
+                points="0,48 18,45 36,44 54,46 72,51 90,57 110,63 132,68 152,70 160,70 160,98 0,98"
+                fill="#0b2817"
+              />
+              {/* Sunlit upper crown band */}
+              <polygon
+                points="0,48 18,45 36,44 54,46 72,51 90,57 108,63 128,69 102,69 80,62 58,54 34,50 12,51 0,53"
+                fill="#2d783f"
+              />
+              {/* Brightest pixel grass crest highlight along top left ridge */}
+              <polygon
+                points="6,47 22,44 40,44 56,46 70,50 54,49 36,47 18,48"
+                fill="#3b8c4c"
+              />
+              <rect x="20" y="44" width="18" height="1" fill="#4aa15b" />
+              <rect x="38" y="45" width="14" height="1" fill="#4aa15b" />
+              {/* Mid meadow contoured slope bands */}
+              <polygon
+                points="0,53 16,51 38,50 62,55 86,62 114,70 144,74 160,73 160,82 0,82"
+                fill="#226334"
+              />
+              <polygon
+                points="0,61 24,58 52,60 80,67 112,75 142,79 160,78 160,88 0,88"
+                fill="#194f2b"
+              />
+              <polygon
+                points="0,70 30,68 62,72 96,79 132,84 160,83 160,93 0,93"
+                fill="#123d22"
+              />
+              <polygon
+                points="0,81 42,80 84,86 126,90 160,89 160,98 0,98"
+                fill="#0c2d19"
+              />
+              <polygon
+                points="0,90 50,90 100,94 160,93 160,98 0,98"
+                fill="#071d10"
+              />
+
+              {/* Subtle pixelated grass texture / dither speckles on sunlit slope */}
+              <g fill="#4aa15b" opacity="0.55">
+                <rect x="12" y="49" width="2" height="1" />
+                <rect x="27" y="47" width="3" height="1" />
+                <rect x="44" y="48" width="2" height="1" />
+                <rect x="60" y="52" width="2" height="1" />
+                <rect x="76" y="56" width="2" height="1" />
+                <rect x="19" y="53" width="2" height="1" />
+                <rect x="35" y="53" width="3" height="1" />
+              </g>
+              <g fill="#123d22" opacity="0.6">
+                <rect x="48" y="64" width="3" height="1" />
+                <rect x="66" y="68" width="2" height="1" />
+                <rect x="92" y="72" width="3" height="1" />
+                <rect x="120" y="76" width="2" height="1" />
+              </g>
+            </svg>
+            {/* Subtle CRT scanline & edge dim overlay */}
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(0deg, rgba(2,6,23,0.16) 0px, rgba(2,6,23,0.16) 1px, transparent 1px, transparent 3px)",
+              }}
+            />
           </div>
 
-          {/* Movable / Draggable Desktop Icons (md+) */}
-          <div className="pointer-events-none absolute inset-0 z-10 hidden md:block">
-            {desktopIcons.map((item) => {
-              const Icon = item.Icon;
-              const pos = iconPositions[item.id];
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onPointerDown={(e) => startDragIcon(e, item.id, item.onOpen)}
-                  style={{ left: pos.x, top: pos.y }}
-                  title={`Drag to move or click to open ${item.label}`}
-                  className={`pointer-events-auto absolute flex w-16 cursor-grab select-none flex-col items-center gap-1 rounded p-1.5 transition-colors active:cursor-grabbing focus:outline-none ${item.color}`}
-                >
-                  <Icon className="h-6 w-6" />
-                  <span className="text-[6.5px] leading-tight" style={PIXEL_FONT}>
-                    {item.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Mobile stacked windows (< md) supporting ALL Tiny OS apps */}
-          <div className="space-y-3 p-3 md:hidden">
-            {Object.values(windows)
-              .filter((w) => w.open && !w.minimized)
-              .sort((a, b) => b.z - a.z)
-              .map((win) => {
-                const style = WINDOW_STYLES[win.id];
+          <div className="relative z-10 flex-1">
+            {/* Mobile quick launcher bar (< md) */}
+            <div className="relative z-10 flex flex-wrap gap-2 p-3 md:hidden">
+              {desktopIcons.map((item) => {
+                const Icon = item.Icon;
                 return (
-                  <div
-                    key={win.id}
-                    className={`flex flex-col overflow-hidden rounded border-2 ${style.border} ${style.bg} ${
-                      win.id === "terminal" ? "h-64" : win.id === "browser" ? "h-80" : ""
-                    }`}
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={item.onOpen}
+                    className={`flex cursor-pointer flex-col items-center gap-1 rounded p-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)] transition focus:outline-none ${item.color}`}
                   >
-                    <div className={`flex items-center justify-between border-b px-3 py-1.5 ${style.bar}`}>
-                      <span className={`text-[8px] ${style.title}`} style={PIXEL_FONT}>
-                        {getWindowTitle(win)}
-                      </span>
-                      {renderWindowHeaderActions(win)}
-                    </div>
-                    {renderAppBody(win.id)}
-                  </div>
+                    <Icon className="h-6 w-6" />
+                    <span className="text-[7px]" style={PIXEL_FONT}>{item.label}</span>
+                  </button>
                 );
               })}
-          </div>
+            </div>
 
-          {/* Desktop Draggable Windows (md+) */}
-          <div className="pointer-events-none absolute inset-0 hidden md:block">
-            {Object.values(windows)
-              .filter((w) => w.open && !w.minimized)
-              .map((win) => {
-                const style = WINDOW_STYLES[win.id];
+            {/* Movable / Draggable Desktop Icons (md+) */}
+            <div className="pointer-events-none absolute inset-0 z-10 hidden md:block">
+              {desktopIcons.map((item) => {
+                const Icon = item.Icon;
+                const pos = iconPositions[item.id];
                 return (
-                  <div
-                    key={win.id}
-                    onPointerDown={() => focusWindow(win.id)}
-                    style={{
-                      left: win.x,
-                      top: win.y,
-                      width: win.w,
-                      height: win.h,
-                      zIndex: win.z,
-                    }}
-                    className={`pointer-events-auto absolute flex flex-col overflow-hidden rounded border-2 shadow-[0_14px_32px_rgba(0,0,0,0.85)] ${style.border} ${style.bg}`}
+                  <button
+                    key={item.id}
+                    type="button"
+                    onPointerDown={(e) => startDragIcon(e, item.id, item.onOpen)}
+                    style={{ left: pos.x, top: pos.y }}
+                    title={`Drag to move or click to open ${item.label}`}
+                    className={`pointer-events-auto absolute flex w-16 cursor-grab select-none flex-col items-center gap-1 rounded p-1.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)] transition-colors active:cursor-grabbing focus:outline-none ${item.color}`}
                   >
+                    <Icon className="h-6 w-6" />
+                    <span className="text-[6.5px] leading-tight" style={PIXEL_FONT}>
+                      {item.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Mobile stacked windows (< md) supporting ALL Tiny OS apps */}
+            <div className="space-y-3 p-3 md:hidden">
+              {Object.values(windows)
+                .filter((w) => w.open && !w.minimized)
+                .sort((a, b) => b.z - a.z)
+                .map((win) => {
+                  const style = WINDOW_STYLES[win.id];
+                  return (
                     <div
-                      onPointerDown={(e) => startDragWindow(e, win.id)}
-                      className={`flex cursor-grab items-center justify-between border-b px-3 py-1.5 active:cursor-grabbing ${style.bar}`}
+                      key={win.id}
+                      className={`flex flex-col overflow-hidden rounded border-2 ${style.border} ${style.bg} ${win.id === "terminal" ? "h-64" : win.id === "browser" ? "h-80" : ""
+                        }`}
                     >
-                      <span className={`text-[8px] ${style.title}`} style={PIXEL_FONT}>
-                        {getWindowTitle(win)}
-                      </span>
-                      {renderWindowHeaderActions(win)}
+                      <div className={`flex items-center justify-between border-b px-3 py-1.5 ${style.bar}`}>
+                        <span className={`text-[8px] ${style.title}`} style={PIXEL_FONT}>
+                          {getWindowTitle(win)}
+                        </span>
+                        {renderWindowHeaderActions(win)}
+                      </div>
+                      {renderAppBody(win.id)}
                     </div>
-                    {renderAppBody(win.id)}
-                  </div>
-                );
-              })}
+                  );
+                })}
+            </div>
+
+            {/* Desktop Draggable Windows (md+) */}
+            <div className="pointer-events-none absolute inset-0 hidden md:block">
+              {Object.values(windows)
+                .filter((w) => w.open && !w.minimized)
+                .map((win) => {
+                  const style = WINDOW_STYLES[win.id];
+                  return (
+                    <div
+                      key={win.id}
+                      onPointerDown={() => focusWindow(win.id)}
+                      style={{
+                        left: win.x,
+                        top: win.y,
+                        width: win.w,
+                        height: win.h,
+                        zIndex: win.z,
+                      }}
+                      className={`pointer-events-auto absolute flex flex-col overflow-hidden rounded border-2 shadow-[0_14px_32px_rgba(0,0,0,0.85)] ${style.border} ${style.bg}`}
+                    >
+                      <div
+                        onPointerDown={(e) => startDragWindow(e, win.id)}
+                        className={`flex cursor-grab items-center justify-between border-b px-3 py-1.5 active:cursor-grabbing ${style.bar}`}
+                      >
+                        <span className={`text-[8px] ${style.title}`} style={PIXEL_FONT}>
+                          {getWindowTitle(win)}
+                        </span>
+                        {renderWindowHeaderActions(win)}
+                      </div>
+                      {renderAppBody(win.id)}
+                    </div>
+                  );
+                })}
+            </div>
           </div>
 
           {/* Start Menu Popover */}
@@ -1982,44 +2130,21 @@ export default function PortfolioOsSection({
             </div>
           )}
 
-          {/* Bottom OS Taskbar with Tiny OS Logo + Window Tabs + Search Bar */}
-          <div className="relative z-20 flex flex-wrap items-center justify-between gap-2 border-t-2 border-emerald-700/50 bg-[#0a110e] px-2 py-1.5">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  playSelect();
-                  setStartMenuOpen((prev) => !prev);
-                }}
-                className="flex cursor-pointer items-center gap-1.5 rounded border border-amber-400/70 bg-amber-950/60 px-2 py-1 text-[8px] text-amber-300 hover:bg-amber-400 hover:text-black"
-                style={PIXEL_FONT}
-              >
-                <TinyOsLogo className="h-3.5 w-3.5" />
-                <span>OS</span>
-              </button>
-
-              {Object.values(windows)
-                .filter((w) => w.open)
-                .map((w) => (
-                  <button
-                    key={w.id}
-                    type="button"
-                    onClick={() => {
-                      playMove();
-                      focusWindow(w.id);
-                    }}
-                    className={`cursor-pointer rounded border px-2 py-1 text-[7px] transition ${
-                      w.minimized
-                        ? "border-white/15 bg-black/50 text-white/50"
-                        : "border-emerald-400/60 bg-emerald-950/50 text-emerald-200"
-                    }`}
-                    style={PIXEL_FONT}
-                  >
-                    {w.title}
-                  </button>
-                ))}
-            </div>
+          {/* Bottom OS Taskbar with larger TINY OS button + Search Bar */}
+          <div className="relative z-20 mt-auto flex flex-wrap items-center justify-between gap-2 border-t-2 border-sky-700/50 bg-[#060d1c]/95 px-2.5 py-2">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                playSelect();
+                setStartMenuOpen((prev) => !prev);
+              }}
+              className="flex cursor-pointer items-center gap-2 rounded border-2 border-amber-400/75 bg-amber-950/65 px-3 py-1.5 text-[9px] text-amber-300 shadow-[inset_0_1px_0_rgba(251,191,36,0.2)] transition hover:bg-amber-400 hover:text-black"
+              style={PIXEL_FONT}
+            >
+              <TinyOsLogo className="h-4 w-4" />
+              <span>TINY OS</span>
+            </button>
 
             <div className="flex items-center gap-2">
               <input
@@ -2029,9 +2154,9 @@ export default function PortfolioOsSection({
                 onClick={(e) => e.stopPropagation()}
                 placeholder="Search OS..."
                 aria-label="Search Tiny OS apps, files, and projects"
-                className="arcade-body w-36 rounded border border-emerald-500/40 bg-black/70 px-2 py-0.5 text-[11px] text-white placeholder-white/35 focus:border-amber-400 focus:outline-none sm:w-44"
+                className="arcade-body w-36 rounded border border-sky-500/40 bg-black/75 px-2 py-1 text-[11px] text-white placeholder-white/35 focus:border-amber-400 focus:outline-none sm:w-48"
               />
-              <div className="arcade-body hidden items-center gap-2 pr-1 text-[11px] tabular-nums text-emerald-300/80 sm:flex">
+              <div className="arcade-body hidden items-center gap-2 pr-1 text-[11px] tabular-nums text-sky-200/85 sm:flex">
                 {overclock && <span className="text-cyan-300">OC</span>}
                 <span>{clockText}</span>
               </div>

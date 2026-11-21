@@ -182,7 +182,7 @@ export default function ArcadeExperience() {
     <section
       id="experience"
       aria-labelledby="experience-heading"
-      className="arcade-screen relative mx-auto w-full max-w-[59rem] px-6 py-4"
+      className="arcade-screen relative mx-auto w-full max-w-[65.5rem] px-4 py-4 sm:px-5"
     >
       <div className="mb-6 flex items-center justify-center gap-3">
         <span className="h-0.5 w-14 bg-amber-500/40" />

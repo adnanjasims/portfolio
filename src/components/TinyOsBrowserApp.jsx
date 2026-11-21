@@ -206,7 +206,7 @@ export default function TinyOsBrowserApp({ onOpenProject }) {
           className="border-2 border-[#275D38] bg-[#061c10] p-2.5 shadow-[3px_3px_0_rgba(39,93,56,0.45)]"
         >
           <p className="text-[8px] text-[#FECB00]" style={PIXEL_FONT}>
-            UALBERTA · B.S. CS
+            UALBERTA · B.Sc. CS
           </p>
           <p className="arcade-body mt-1 text-[11px] text-[#d5f0df]">
             Sep 2022 - Dec 2026 · GPA 3.6 · Dean&apos;s Honor Roll

@@ -33,7 +33,7 @@ export default function ChessEngineEmbed() {
   }, [hasUrl]);
 
   return (
-    <section className="arcade-screen relative mx-auto w-full max-w-4xl px-4 py-6">
+    <section className="arcade-screen relative mx-auto w-full max-w-[64rem] px-3 py-6 sm:px-5">
       <div className="mx-auto mb-5 max-w-2xl text-center">
         <div className="mb-3 flex items-center justify-center gap-3">
           <span className="h-0.5 w-12 bg-emerald-500/40" />

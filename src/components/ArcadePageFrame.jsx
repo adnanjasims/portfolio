@@ -65,7 +65,7 @@ export default function ArcadePageFrame({
 
   return (
     <div className="relative flex min-h-screen w-full flex-col">
-      <div className="relative z-10 flex shrink-0 items-center justify-between gap-2 border-b-4 border-amber-500/50 bg-gradient-to-b from-amber-950/80 to-black px-4 py-3 sm:grid sm:grid-cols-[1fr_auto_1fr]">
+      <div className="relative z-20 flex shrink-0 items-center justify-between gap-2 border-b-4 border-amber-500/50 bg-gradient-to-b from-amber-950/90 to-black px-4 py-3 sm:grid sm:grid-cols-[1fr_auto_1fr] md:sticky md:top-0 md:h-16">
         <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent_0px,transparent_20px,rgba(251,191,36,0.03)_20px,rgba(251,191,36,0.03)_22px)]" />
         <div className="relative z-10 flex items-center gap-3 justify-self-start sm:gap-4">
           <a
@@ -112,11 +112,10 @@ export default function ArcadePageFrame({
               type="button"
               onClick={() => onToggleOverclock?.()}
               aria-pressed={overclock}
-              className={`cursor-pointer rounded border px-2 py-1 text-[8px] uppercase tracking-wider transition focus:outline-none focus:ring-1 focus:ring-cyan-400 sm:text-[9px] ${
-                overclock
-                  ? "border-cyan-400 bg-cyan-950/70 text-cyan-300 hover:bg-cyan-900/60"
-                  : "border-white/25 bg-black/60 text-white/60 hover:border-cyan-400/70 hover:text-cyan-300"
-              }`}
+              className={`cursor-pointer rounded border px-2 py-1 text-[8px] uppercase tracking-wider transition focus:outline-none focus:ring-1 focus:ring-cyan-400 sm:text-[9px] ${overclock
+                ? "border-cyan-400 bg-cyan-950/70 text-cyan-300 hover:bg-cyan-900/60"
+                : "border-white/25 bg-black/60 text-white/60 hover:border-cyan-400/70 hover:text-cyan-300"
+                }`}
               style={PIXEL_FONT}
               title="Toggle Overclock mode"
             >
@@ -128,11 +127,10 @@ export default function ArcadePageFrame({
             onClick={() => onToggleSfx?.()}
             aria-pressed={sfxEnabled}
             aria-label={sfxEnabled ? "Mute 8-bit sound effects" : "Enable 8-bit sound effects"}
-            className={`cursor-pointer rounded border-2 p-1.5 transition focus:outline-none focus:ring-1 focus:ring-amber-400 ${
-              sfxEnabled
-                ? "border-emerald-400/80 bg-emerald-950/60 text-emerald-300 hover:bg-emerald-900/60"
-                : "border-white/25 bg-black/60 text-white/65 hover:border-red-400/70 hover:text-white/90"
-            }`}
+            className={`cursor-pointer rounded border-2 p-1.5 transition focus:outline-none focus:ring-1 focus:ring-amber-400 ${sfxEnabled
+              ? "border-emerald-400/80 bg-emerald-950/60 text-emerald-300 hover:bg-emerald-900/60"
+              : "border-white/25 bg-black/60 text-white/65 hover:border-red-400/70 hover:text-white/90"
+              }`}
             title={sfxEnabled ? "SFX ON (click to mute)" : "SFX OFF (click to unmute)"}
           >
             <RetroSfxLogo enabled={sfxEnabled} />
@@ -140,8 +138,8 @@ export default function ArcadePageFrame({
         </div>
       </div>
 
-      <main className="relative z-10 flex flex-1 flex-col items-center px-4 md:ml-[200px] md:mr-[200px] lg:ml-[240px] lg:mr-[240px]">
-        <div className="arcade-frame relative w-full max-w-5xl flex-1 py-6">
+      <main className="relative z-10 flex flex-1 flex-col items-center px-3 sm:px-4 md:ml-[190px] md:mr-[190px] lg:ml-[228px] lg:mr-[228px]">
+        <div className="arcade-frame relative w-full max-w-6xl flex-1 py-5 sm:py-6">
           {children}
         </div>
       </main>

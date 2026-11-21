@@ -79,8 +79,8 @@ export default function ArcadeCabinet({
             : "";
 
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center bg-[#0c0c0f] p-3 md:p-6">
-      <div className="flex w-full max-w-4xl flex-col overflow-hidden rounded-xl border-[8px] border-[#1c1c22] bg-[#12121a] shadow-[0_40px_80px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.04)]">
+    <div className="flex h-full w-full flex-col items-center justify-center bg-[#0c0c0f] px-3 py-4 sm:px-5">
+      <div className="flex w-full max-w-[64rem] flex-col overflow-hidden rounded-xl border-[8px] border-[#1c1c22] bg-[#12121a] shadow-[0_40px_80px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.04)]">
         {/* Top marquee strip */}
         <div className="flex items-center justify-between border-b-4 border-[#2a2a32] bg-[#18181f] px-4 py-2">
           <span className="hidden text-[8px] text-amber-500/60 sm:inline" style={PIXEL_FONT}>
@@ -90,9 +90,8 @@ export default function ArcadeCabinet({
             PROJECT PORTFOLIO
           </p>
           <span
-            className={`hidden text-[8px] tabular-nums transition-colors sm:inline ${
-              coinFlash ? "text-amber-300" : "text-amber-500/70"
-            }`}
+            className={`hidden text-[8px] tabular-nums transition-colors sm:inline ${coinFlash ? "text-amber-300" : "text-amber-500/70"
+              }`}
             style={PIXEL_FONT}
           >
             CRD {String(credits).padStart(2, "0")}
@@ -273,23 +272,20 @@ export default function ArcadeCabinet({
 
               {/* Recessed arcade coin slot bezel + dark inner slit */}
               <div
-                className={`relative z-10 flex h-3 w-11 items-center justify-center rounded-none border-2 transition ${
-                  coinFlash
-                    ? "border-amber-400 bg-amber-950/80 shadow-[0_0_12px_rgba(251,191,36,0.65)]"
-                    : "border-[#3a3a4a] bg-[#1a1a24] group-hover:border-amber-400/60"
-                }`}
+                className={`relative z-10 flex h-3 w-11 items-center justify-center rounded-none border-2 transition ${coinFlash
+                  ? "border-amber-400 bg-amber-950/80 shadow-[0_0_12px_rgba(251,191,36,0.65)]"
+                  : "border-[#3a3a4a] bg-[#1a1a24] group-hover:border-amber-400/60"
+                  }`}
               >
                 <span
-                  className={`h-1 w-7 transition-colors ${
-                    coinFlash ? "bg-amber-300/80" : "bg-black"
-                  }`}
+                  className={`h-1 w-7 transition-colors ${coinFlash ? "bg-amber-300/80" : "bg-black"
+                    }`}
                 />
               </div>
             </div>
             <span
-              className={`text-[8px] uppercase transition ${
-                coinFlash ? "text-amber-300" : "text-slate-400 group-hover:text-amber-300"
-              }`}
+              className={`text-[8px] uppercase transition ${coinFlash ? "text-amber-300" : "text-slate-400 group-hover:text-amber-300"
+                }`}
               style={PIXEL_FONT}
             >
               {coinFlash ? "+1 CRD" : "COIN"}
