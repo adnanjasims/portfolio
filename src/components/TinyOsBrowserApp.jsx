@@ -19,7 +19,7 @@ const MINI_EXPERIENCE = [
     role: "Software Developer",
     company: "GleamCo",
     period: "May 2026 - Aug 2026",
-    note: "TypeScript/Next.js/SQL CRM migration, NextAuth RBAC, $80k+ processed, quotes 10m to <2m.",
+    note: "TypeScript/Next.js/SQL CRM migration, NextAuth RBAC, $80k+ processed, quotes 10m to under 2m.",
   },
   {
     role: "Sales Representative",
@@ -55,8 +55,11 @@ export default function TinyOsBrowserApp({ onOpenProject }) {
     const box = scrollBoxRef.current;
     const target = sectionRefs.current[secId];
     if (box && target) {
+      const boxRect = box.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const offsetTop = Math.max(0, targetRect.top - boxRect.top + box.scrollTop - 8);
       box.scrollTo({
-        top: Math.max(0, target.offsetTop - box.offsetTop - 6),
+        top: offsetTop,
         behavior: "smooth",
       });
     }

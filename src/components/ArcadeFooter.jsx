@@ -4,7 +4,29 @@
 import { GITHUB_URL, LINKEDIN_URL } from "../social";
 import { GitHubPixelLogo, LinkedInPixelLogo } from "./SocialPixelIcons";
 
-export default function ArcadeFooter() {
+function RetroRestartIcon({ className = "h-5 w-5" }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      className={className}
+      shapeRendering="crispEdges"
+      fill="currentColor"
+      aria-hidden="true"
+      style={{ imageRendering: "pixelated" }}
+    >
+      <rect x="5" y="2" width="6" height="2" />
+      <rect x="3" y="4" width="2" height="4" />
+      <rect x="11" y="4" width="2" height="2" />
+      <rect x="9" y="5" width="5" height="2" />
+      <rect x="12" y="3" width="2" height="2" />
+      <rect x="3" y="9" width="2" height="3" />
+      <rect x="5" y="12" width="6" height="2" />
+      <rect x="11" y="9" width="2" height="3" />
+    </svg>
+  );
+}
+
+export default function ArcadeFooter({ onReplayBoot }) {
   return (
     <footer className="arcade-screen relative mx-auto w-full max-w-2xl px-4 py-10 text-center">
       <div className="mx-auto mb-6 flex w-full max-w-md items-center gap-3">
@@ -104,6 +126,20 @@ export default function ArcadeFooter() {
         >
           SEARCH
         </span>
+      </div>
+
+      <div className="mt-8 flex justify-center">
+        <button
+          type="button"
+          onClick={() => onReplayBoot?.()}
+          title="Restart CRT boot sequence"
+          aria-label="Restart CRT boot sequence"
+          className="inline-flex cursor-pointer items-center gap-2.5 rounded border-2 border-slate-500/60 bg-slate-900/75 px-5 py-3 text-[10px] uppercase tracking-wider text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition hover:border-slate-300 hover:bg-slate-800 hover:text-white active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-slate-400/50"
+          style={{ fontFamily: '"Press Start 2P", cursive' }}
+        >
+          <RetroRestartIcon className="h-5 w-5 shrink-0" />
+          <span>REBOOT</span>
+        </button>
       </div>
     </footer>
   );

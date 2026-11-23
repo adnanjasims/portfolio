@@ -277,10 +277,6 @@ export default function ArcadeMenu({
           );
         })}
       </div>
-
-      <p className="mt-2 text-[7px] text-white/50" style={{ fontFamily: '"Press Start 2P", cursive' }}>
-        CLICK OR USE STICK + BUTTONS TO OPEN
-      </p>
     </div>
   );
 }

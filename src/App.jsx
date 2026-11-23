@@ -208,9 +208,6 @@ function App() {
           selectedProjectId={selectedProjectId}
           onSelectTopRun={handleSelectTopRun}
           onJumpSection={handleJumpSection}
-          credits={credits}
-          onInsertCoin={handleInsertCoin}
-          onReplayBoot={handleReplayBoot}
           onOpenTerminal={handleOpenTerminal}
         />
 
@@ -251,8 +248,6 @@ function App() {
               onArcadeInput={handleKonamiStep}
               credits={credits}
               onInsertCoin={handleInsertCoin}
-              onJumpSection={handleJumpSection}
-              onReplayBoot={handleReplayBoot}
             >
               <ArcadeMenu
                 selectedProjectId={selectedProjectId}
@@ -307,7 +302,7 @@ function App() {
           </div>
 
           <div className={enter("arcade-enter-delay-5")}>
-            <ArcadeFooter />
+            <ArcadeFooter onReplayBoot={handleReplayBoot} />
           </div>
         </ArcadePageFrame>
       </div>

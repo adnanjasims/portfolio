@@ -34,28 +34,6 @@ function RetroComputerIcon({ className = "h-12 w-12" }) {
   );
 }
 
-function RetroRebootIcon({ className = "h-4 w-4" }) {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      className={className}
-      shapeRendering="crispEdges"
-      fill="currentColor"
-      aria-hidden="true"
-      style={{ imageRendering: "pixelated" }}
-    >
-      <rect x="5" y="2" width="6" height="2" />
-      <rect x="3" y="4" width="2" height="3" />
-      <rect x="11" y="4" width="2" height="2" />
-      <rect x="10" y="5" width="4" height="2" />
-      <rect x="12" y="3" width="2" height="2" />
-      <rect x="3" y="9" width="2" height="3" />
-      <rect x="5" y="12" width="6" height="2" />
-      <rect x="11" y="9" width="2" height="3" />
-    </svg>
-  );
-}
-
 const NAV_ITEMS = [
   { id: "intro", label: "INTRO" },
   { id: "skills", label: "SKILLS" },
@@ -67,15 +45,12 @@ const NAV_ITEMS = [
 ];
 
 /**
- * Left and right arcade walls: identity, interactive nav, clickable TOP RUNS, credits & boot replay.
+ * Left and right arcade walls: identity, CONTENTS nav, clickable TOP RUNS, and Tiny OS terminal shortcut.
  */
 export default function ArcadeSidePanels({
   selectedProjectId,
   onSelectTopRun,
   onJumpSection,
-  credits = 0,
-  onInsertCoin,
-  onReplayBoot,
   onOpenTerminal,
 }) {
   const [activeSection, setActiveSection] = useState("intro");
@@ -126,15 +101,6 @@ export default function ArcadeSidePanels({
             </button>
           );
         })}
-        <button
-          type="button"
-          onClick={() => onInsertCoin?.()}
-          className="ml-auto shrink-0 cursor-pointer rounded border border-emerald-500/50 bg-emerald-950/60 px-2 py-1 text-[7px] tabular-nums text-emerald-300"
-          style={PIXEL_FONT}
-          title="Insert coin"
-        >
-          CRD {String(credits).padStart(2, "0")}
-        </button>
       </nav>
 
       <aside className="arcade-screen fixed left-0 top-16 z-10 hidden h-[calc(100vh-4rem)] w-[190px] flex-shrink-0 flex-col items-center overflow-y-auto border-r-4 border-amber-500/30 bg-[#08080c]/65 py-5 md:flex lg:w-[228px]">
@@ -156,8 +122,8 @@ export default function ArcadeSidePanels({
           </div>
 
           <nav aria-label="Section quick jump" className="w-full rounded border-2 border-white/20 bg-black/60 p-3">
-            <p className="mb-2 text-[8px] text-white/75" style={PIXEL_FONT}>
-              STAGE MAP
+            <p className="mb-2 text-[9.5px] text-white/75 lg:text-[10.5px]" style={PIXEL_FONT}>
+              CONTENTS
             </p>
             <div className="space-y-1">
               {NAV_ITEMS.map((item) => {
@@ -167,7 +133,7 @@ export default function ArcadeSidePanels({
                     key={item.id}
                     type="button"
                     onClick={() => onJumpSection?.(item.id)}
-                    className={`flex w-full cursor-pointer items-center justify-between rounded px-1.5 py-1 text-left text-[7px] transition focus:outline-none ${isActive
+                    className={`flex w-full cursor-pointer items-center justify-between rounded px-1.5 py-1 text-left text-[8.5px] transition focus:outline-none lg:text-[9px] ${isActive
                       ? "bg-amber-400/15 text-amber-300"
                       : "text-white/55 hover:bg-white/10 hover:text-white"
                       }`}
@@ -182,7 +148,7 @@ export default function ArcadeSidePanels({
           </nav>
 
           <div className="w-full rounded border-2 border-white/20 bg-black/60 p-3">
-            <p className="mb-2 text-[8px] text-white/75" style={PIXEL_FONT}>
+            <p className="mb-2 text-[9.5px] text-white/75 lg:text-[10.5px]" style={PIXEL_FONT}>
               TOP RUNS
             </p>
             <div className="space-y-1">
@@ -193,7 +159,7 @@ export default function ArcadeSidePanels({
                     key={run.id}
                     type="button"
                     onClick={() => onSelectTopRun?.(run.id)}
-                    className={`flex w-full cursor-pointer items-center justify-between rounded px-1.5 py-1 text-left text-[7px] leading-relaxed transition focus:outline-none ${isCurrent
+                    className={`flex w-full cursor-pointer items-center justify-between rounded px-1.5 py-1 text-left text-[8.5px] leading-relaxed transition focus:outline-none lg:text-[9px] ${isCurrent
                       ? "bg-amber-400 text-black"
                       : "text-white/60 hover:bg-white/10 hover:text-amber-300"
                       }`}
@@ -231,31 +197,6 @@ export default function ArcadeSidePanels({
               <p>KABOOM</p>
             </div>
           </div>
-
-          <button
-            type="button"
-            onClick={() => onInsertCoin?.()}
-            className="w-full cursor-pointer rounded border-2 border-emerald-500/35 bg-black/60 p-2.5 text-center transition hover:border-emerald-400 hover:bg-emerald-950/30 active:translate-y-0.5 focus:outline-none"
-            title="Insert coin"
-          >
-            <p className="text-[8px] leading-relaxed text-emerald-400/90 lg:text-[9px]" style={PIXEL_FONT}>
-              CREDITS
-            </p>
-            <p className="mt-1 text-[11px] tabular-nums text-emerald-300" style={PIXEL_FONT}>
-              {String(credits).padStart(2, "0")}
-            </p>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onReplayBoot?.()}
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded border-2 border-amber-500/50 bg-black/75 px-3 py-3 text-[8px] uppercase text-amber-300/90 transition hover:border-amber-400 hover:bg-amber-950/45 hover:text-amber-200 active:translate-y-0.5 focus:outline-none lg:text-[9px]"
-            style={PIXEL_FONT}
-            title="Reboot CRT startup sequence"
-          >
-            <RetroRebootIcon className="h-4 w-4 shrink-0" />
-            <span>REBOOT</span>
-          </button>
 
           <button
             type="button"

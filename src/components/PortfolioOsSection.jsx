@@ -13,6 +13,24 @@ import {
   saveVfs,
 } from "../utils/portfolioVfs";
 
+function clampWindowPos(win, box) {
+  if (!box) return { x: win.x, y: win.y };
+  const visibleW = Math.min(win.w, Math.max(120, box.width - 16));
+  const visibleH = Math.min(win.h, Math.max(80, box.height - 80));
+  const maxX = Math.max(4, box.width - visibleW);
+  const maxY = Math.max(4, box.height - visibleH - 42);
+  return {
+    x: Math.max(4, Math.min(maxX, win.x)),
+    y: Math.max(4, Math.min(maxY, win.y)),
+  };
+}
+
+function isSameOrChildPath(candidateParts, targetParts) {
+  if (!Array.isArray(candidateParts) || !Array.isArray(targetParts)) return false;
+  if (candidateParts.length < targetParts.length) return false;
+  return targetParts.every((seg, i) => candidateParts[i] === seg);
+}
+
 const PIXEL_FONT = { fontFamily: '"Press Start 2P", cursive' };
 
 const SKILL_GROUPS = [
@@ -253,6 +271,18 @@ function collectFiles(node, basePath = []) {
   return results;
 }
 
+const DESKTOP_ICONS = [
+  { id: "terminal", label: "TERM", color: "text-emerald-300 hover:bg-emerald-500/15", Icon: PixelTerminalIcon },
+  { id: "files", label: "FILES", color: "text-amber-300 hover:bg-amber-500/15", Icon: PixelFolderIcon },
+  { id: "readme", label: "README", color: "text-white/85 hover:bg-white/10", Icon: PixelFileIcon },
+  { id: "notebad", label: "NOTEBAD", color: "text-amber-200 hover:bg-amber-500/15", Icon: PixelNoteBadIcon },
+  { id: "paint", label: "PAINT", color: "text-pink-300 hover:bg-pink-500/15", Icon: PixelPaintIcon },
+  { id: "snake", label: "SNAKE", color: "text-emerald-300 hover:bg-emerald-500/15", Icon: PixelSnakeIcon },
+  { id: "projects", label: "PROJECTS", color: "text-amber-300 hover:bg-amber-500/15", Icon: PixelFolderIcon },
+  { id: "browser", label: "BROWSER", color: "text-cyan-300 hover:bg-cyan-500/15", Icon: PixelBrowserIcon },
+  { id: "sysinfo", label: "SYSINFO", color: "text-cyan-300 hover:bg-cyan-500/15", Icon: PixelChipIcon },
+];
+
 const INITIAL_WINDOWS = {
   terminal: { id: "terminal", title: "TERMINAL", open: false, minimized: false, x: 145, y: 18, w: 500, h: 330, z: 3 },
   files: { id: "files", title: "FILES", open: false, minimized: false, x: 660, y: 24, w: 235, h: 255, z: 2 },
@@ -361,6 +391,7 @@ export default function PortfolioOsSection({
   });
   const [noteStatus, setNoteStatus] = useState("100% Bug-Free*");
   const [newEntryName, setNewEntryName] = useState("");
+  const [explorerError, setExplorerError] = useState("");
 
   // Pixel Paint state
   const [paintGrid, setPaintGrid] = useState(() => createBlankGrid());
@@ -375,9 +406,12 @@ export default function PortfolioOsSection({
   const [snakeOver, setSnakeOver] = useState(false);
   const [snakeScore, setSnakeScore] = useState(0);
   const [snakeBest, setSnakeBest] = useState(() => loadSnakeBest());
+  const snakeRef = useRef(INITIAL_SNAKE);
   const snakeDirRef = useRef({ x: 1, y: 0 });
   const snakeNextDirRef = useRef({ x: 1, y: 0 });
   const snakeFoodRef = useRef(snakeFood);
+  const snakeScoreRef = useRef(0);
+  const snakeBestRef = useRef(snakeBest);
 
   const [clockText, setClockText] = useState(() =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -390,8 +424,20 @@ export default function PortfolioOsSection({
   const iconDragRef = useRef(null);
 
   useEffect(() => {
+    snakeRef.current = snake;
+  }, [snake]);
+
+  useEffect(() => {
     snakeFoodRef.current = snakeFood;
   }, [snakeFood]);
+
+  useEffect(() => {
+    snakeScoreRef.current = snakeScore;
+  }, [snakeScore]);
+
+  useEffect(() => {
+    snakeBestRef.current = snakeBest;
+  }, [snakeBest]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -403,11 +449,13 @@ export default function PortfolioOsSection({
   useEffect(() => {
     if (focusRequestId <= 0) return undefined;
     const timer = window.setTimeout(() => {
+      const box = desktopRef.current?.getBoundingClientRect();
       setWindows((prev) => {
         const highestZ = Object.values(prev).reduce((max, w) => Math.max(max, w.z), 4);
+        const clamped = clampWindowPos(prev.terminal, box);
         return {
           ...prev,
-          terminal: { ...prev.terminal, open: true, minimized: false, z: highestZ + 1 },
+          terminal: { ...prev.terminal, ...clamped, open: true, minimized: false, z: highestZ + 1 },
         };
       });
       termInputRef.current?.focus({ preventScroll: true });
@@ -421,65 +469,63 @@ export default function PortfolioOsSection({
     }
   }, [lines]);
 
-  // Snake game tick
+  // Snake game tick (pure ref computation outside React state updaters)
   useEffect(() => {
     if (!snakeRunning || snakeOver || !windows.snake.open || windows.snake.minimized) {
       return undefined;
     }
 
     const interval = window.setInterval(() => {
+      const prev = snakeRef.current;
       const nextDir = snakeNextDirRef.current;
       snakeDirRef.current = nextDir;
 
-      setSnake((prev) => {
-        const head = prev[0];
-        const nextHead = { x: head.x + nextDir.x, y: head.y + nextDir.y };
+      const head = prev[0];
+      const nextHead = { x: head.x + nextDir.x, y: head.y + nextDir.y };
 
-        if (
-          nextHead.x < 0 ||
-          nextHead.x >= SNAKE_COLS ||
-          nextHead.y < 0 ||
-          nextHead.y >= SNAKE_ROWS
-        ) {
-          playClose();
-          setSnakeOver(true);
-          setSnakeRunning(false);
-          return prev;
+      if (
+        nextHead.x < 0 ||
+        nextHead.x >= SNAKE_COLS ||
+        nextHead.y < 0 ||
+        nextHead.y >= SNAKE_ROWS
+      ) {
+        playClose();
+        setSnakeOver(true);
+        setSnakeRunning(false);
+        return;
+      }
+
+      const food = snakeFoodRef.current;
+      const ateFood = nextHead.x === food.x && nextHead.y === food.y;
+      const bodyToCheck = ateFood ? prev : prev.slice(0, -1);
+
+      if (bodyToCheck.some((seg) => seg.x === nextHead.x && seg.y === nextHead.y)) {
+        playClose();
+        setSnakeOver(true);
+        setSnakeRunning(false);
+        return;
+      }
+
+      const nextSnake = ateFood
+        ? [nextHead, ...prev]
+        : [nextHead, ...prev.slice(0, -1)];
+      snakeRef.current = nextSnake;
+      setSnake(nextSnake);
+
+      if (ateFood) {
+        playCoin();
+        const updatedScore = snakeScoreRef.current + 10;
+        snakeScoreRef.current = updatedScore;
+        setSnakeScore(updatedScore);
+        if (updatedScore > snakeBestRef.current) {
+          snakeBestRef.current = updatedScore;
+          setSnakeBest(updatedScore);
+          saveSnakeBest(updatedScore);
         }
-
-        const food = snakeFoodRef.current;
-        const ateFood = nextHead.x === food.x && nextHead.y === food.y;
-        const bodyToCheck = ateFood ? prev : prev.slice(0, -1);
-
-        if (bodyToCheck.some((seg) => seg.x === nextHead.x && seg.y === nextHead.y)) {
-          playClose();
-          setSnakeOver(true);
-          setSnakeRunning(false);
-          return prev;
-        }
-
-        const nextSnake = ateFood
-          ? [nextHead, ...prev]
-          : [nextHead, ...prev.slice(0, -1)];
-
-        if (ateFood) {
-          playCoin();
-          setSnakeScore((s) => {
-            const updated = s + 10;
-            setSnakeBest((best) => {
-              if (updated > best) {
-                saveSnakeBest(updated);
-                return updated;
-              }
-              return best;
-            });
-            return updated;
-          });
-          setSnakeFood(randomFood(nextSnake));
-        }
-
-        return nextSnake;
-      });
+        const nextFood = randomFood(nextSnake);
+        snakeFoodRef.current = nextFood;
+        setSnakeFood(nextFood);
+      }
     }, 150);
 
     return () => window.clearInterval(interval);
@@ -492,8 +538,11 @@ export default function PortfolioOsSection({
   }, []);
 
   const startOrResetSnake = useCallback((shouldRun = true) => {
+    snakeRef.current = INITIAL_SNAKE;
     snakeDirRef.current = { x: 1, y: 0 };
     snakeNextDirRef.current = { x: 1, y: 0 };
+    snakeFoodRef.current = { x: 11, y: 5 };
+    snakeScoreRef.current = 0;
     setSnake(INITIAL_SNAKE);
     setSnakeFood({ x: 11, y: 5 });
     setSnakeScore(0);
@@ -537,17 +586,17 @@ export default function PortfolioOsSection({
 
       const winDrag = dragRef.current;
       if (winDrag) {
-        const maxX = box
-          ? Math.max(4, box.width - Math.min(winDrag.w, Math.max(120, box.width - 16)))
-          : 650;
-        const maxY = box
-          ? Math.max(4, box.height - Math.min(winDrag.h, Math.max(80, box.height - 80)) - 42)
-          : 340;
-        const nextX = Math.max(4, Math.min(maxX, winDrag.origX + (e.clientX - winDrag.startX)));
-        const nextY = Math.max(4, Math.min(maxY, winDrag.origY + (e.clientY - winDrag.startY)));
+        const clamped = clampWindowPos(
+          {
+            ...winDrag,
+            x: winDrag.origX + (e.clientX - winDrag.startX),
+            y: winDrag.origY + (e.clientY - winDrag.startY),
+          },
+          box
+        );
         setWindows((prev) => ({
           ...prev,
-          [winDrag.id]: { ...prev[winDrag.id], x: nextX, y: nextY },
+          [winDrag.id]: { ...prev[winDrag.id], x: clamped.x, y: clamped.y },
         }));
       }
 
@@ -587,29 +636,53 @@ export default function PortfolioOsSection({
       setPaintDrawing(false);
     };
 
+    const onResize = () => {
+      const box = desktopRef.current?.getBoundingClientRect();
+      if (!box) return;
+      setWindows((prev) => {
+        let changed = false;
+        const next = {};
+        for (const [id, win] of Object.entries(prev)) {
+          const clamped = clampWindowPos(win, box);
+          if (clamped.x !== win.x || clamped.y !== win.y) {
+            changed = true;
+            next[id] = { ...win, ...clamped };
+          } else {
+            next[id] = win;
+          }
+        }
+        return changed ? next : prev;
+      });
+    };
+
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
     window.addEventListener("pointercancel", onCancelDrag);
     window.addEventListener("blur", onCancelDrag);
+    window.addEventListener("resize", onResize);
     return () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("pointercancel", onCancelDrag);
       window.removeEventListener("blur", onCancelDrag);
+      window.removeEventListener("resize", onResize);
     };
   }, []);
 
   const focusWindow = useCallback((id) => {
+    const box = desktopRef.current?.getBoundingClientRect();
     setWindows((prev) => {
       const current = prev[id];
       if (!current) return prev;
       const highestZ = Object.values(prev).reduce((max, w) => Math.max(max, w.z), 4);
-      if (current.open && !current.minimized && current.z === highestZ && highestZ > 4) {
+      const clamped = clampWindowPos(current, box);
+      const posChanged = clamped.x !== current.x || clamped.y !== current.y;
+      if (current.open && !current.minimized && current.z === highestZ && highestZ > 4 && !posChanged) {
         return prev;
       }
       return {
         ...prev,
-        [id]: { ...current, open: true, minimized: false, z: highestZ + 1 },
+        [id]: { ...current, ...clamped, open: true, minimized: false, z: highestZ + 1 },
       };
     });
   }, []);
@@ -684,7 +757,10 @@ export default function PortfolioOsSection({
     if (!isSafeEntryName(fileName)) return;
     const nextVfs = JSON.parse(JSON.stringify(vfs));
     const parent = getNode(nextVfs, parentParts);
-    if (!parent || parent.type !== "dir") return;
+    if (!parent || parent.type !== "dir") {
+      setNoteStatus("Parent folder missing");
+      return;
+    }
     parent.children[fileName] = {
       type: "file",
       content: noteText.slice(0, MAX_VFS_TEXT_LENGTH),
@@ -722,10 +798,18 @@ export default function PortfolioOsSection({
 
   const createEntryInExplorer = (kind) => {
     const clean = newEntryName.trim().replace(/[/\\]/g, "");
-    if (!isSafeEntryName(clean)) return;
+    if (!isSafeEntryName(clean)) {
+      setExplorerError("Invalid name (use simple letters/numbers)");
+      return;
+    }
     const nextVfs = JSON.parse(JSON.stringify(vfs));
     const dir = getNode(nextVfs, explorerPath);
-    if (!dir || dir.type !== "dir" || Object.prototype.hasOwnProperty.call(dir.children, clean)) {
+    if (!dir || dir.type !== "dir") {
+      setExplorerError("Folder no longer exists");
+      return;
+    }
+    if (Object.prototype.hasOwnProperty.call(dir.children, clean)) {
+      setExplorerError(`${clean} already exists`);
       return;
     }
 
@@ -737,6 +821,7 @@ export default function PortfolioOsSection({
     setVfs(nextVfs);
     saveVfs(nextVfs);
     setNewEntryName("");
+    setExplorerError("");
     playSelect();
 
     if (kind === "file") {
@@ -756,8 +841,16 @@ export default function PortfolioOsSection({
       return;
     }
     delete dir.children[name];
+    const removedPath = [...explorerPath, name];
+    if (isSameOrChildPath(cwd, removedPath)) {
+      setCwd(explorerPath);
+    }
+    if (isSameOrChildPath(notePath, removedPath)) {
+      setNoteStatus("Deleted on disk (Save to recreate)");
+    }
     setVfs(nextVfs);
     saveVfs(nextVfs);
+    setExplorerError("");
     playClose();
   };
 
@@ -1127,6 +1220,10 @@ export default function PortfolioOsSection({
         if (!parent || !Object.prototype.hasOwnProperty.call(parent.children, targetName)) out.push({ type: "error", text: `rm: ${args[0]}: Not found` });
         else {
           delete parent.children[targetName];
+          const safeFallback = parentParts.length >= 2 ? parentParts : ["home", "adnan"];
+          if (isSameOrChildPath(cwd, targetParts)) setCwd(safeFallback);
+          if (isSameOrChildPath(explorerPath, targetParts)) setExplorerPath(safeFallback);
+          if (isSameOrChildPath(notePath, targetParts)) setNoteStatus("Deleted on disk (Save to recreate)");
           setVfs(nextVfs);
           saveVfs(nextVfs);
           out.push({ type: "muted", text: `Removed ${targetName}.` });
@@ -1232,96 +1329,23 @@ export default function PortfolioOsSection({
     return results.slice(0, 7);
   }, [osSearch, vfs]);
 
-  const desktopIcons = [
-    {
-      id: "terminal",
-      label: "TERM",
-      color: "text-emerald-300 hover:bg-emerald-500/15",
-      Icon: PixelTerminalIcon,
-      onOpen: () => {
-        playSelect();
-        focusWindow("terminal");
-      },
-    },
-    {
-      id: "files",
-      label: "FILES",
-      color: "text-amber-300 hover:bg-amber-500/15",
-      Icon: PixelFolderIcon,
-      onOpen: () => {
-        playSelect();
-        focusWindow("files");
-      },
-    },
-    {
-      id: "readme",
-      label: "README",
-      color: "text-white/85 hover:bg-white/10",
-      Icon: PixelFileIcon,
-      onOpen: () => openFileInNoteBad(["home", "adnan", "README.txt"]),
-    },
-    {
-      id: "notebad",
-      label: "NOTEBAD",
-      color: "text-amber-200 hover:bg-amber-500/15",
-      Icon: PixelNoteBadIcon,
-      onOpen: () => {
-        playSelect();
-        focusWindow("notepad");
-      },
-    },
-    {
-      id: "paint",
-      label: "PAINT",
-      color: "text-pink-300 hover:bg-pink-500/15",
-      Icon: PixelPaintIcon,
-      onOpen: () => {
-        playSelect();
-        focusWindow("paint");
-      },
-    },
-    {
-      id: "snake",
-      label: "SNAKE",
-      color: "text-emerald-300 hover:bg-emerald-500/15",
-      Icon: PixelSnakeIcon,
-      onOpen: () => {
-        playSelect();
-        focusWindow("snake");
-      },
-    },
-    {
-      id: "projects",
-      label: "PROJECTS",
-      color: "text-amber-300 hover:bg-amber-500/15",
-      Icon: PixelFolderIcon,
-      onOpen: () => {
-        playSelect();
-        setExplorerPath(["home", "adnan", "projects"]);
-        focusWindow("files");
-      },
-    },
-    {
-      id: "browser",
-      label: "BROWSER",
-      color: "text-cyan-300 hover:bg-cyan-500/15",
-      Icon: PixelBrowserIcon,
-      onOpen: () => {
-        playSelect();
-        focusWindow("browser");
-      },
-    },
-    {
-      id: "sysinfo",
-      label: "SYSINFO",
-      color: "text-cyan-300 hover:bg-cyan-500/15",
-      Icon: PixelChipIcon,
-      onOpen: () => {
-        playSelect();
-        focusWindow("sysinfo");
-      },
-    },
-  ];
+  const handleOpenDesktopIcon = (id) => {
+    if (id === "readme") {
+      openFileInNoteBad(["home", "adnan", "README.txt"]);
+      return;
+    }
+    playSelect();
+    if (id === "projects") {
+      setExplorerPath(["home", "adnan", "projects"]);
+      focusWindow("files");
+      return;
+    }
+    if (id === "notebad") {
+      focusWindow("notepad");
+      return;
+    }
+    focusWindow(id);
+  };
 
   const explorerDir = getNode(vfs, explorerPath);
   const explorerItems =
@@ -1388,7 +1412,10 @@ export default function PortfolioOsSection({
             {explorerPath.length > 2 && (
               <button
                 type="button"
-                onClick={() => setExplorerPath((p) => p.slice(0, -1))}
+                onClick={() => {
+                  setExplorerError("");
+                  setExplorerPath((p) => p.slice(0, -1));
+                }}
                 className="cursor-pointer rounded border border-white/20 px-1.5 py-0.5 text-[7px] text-amber-300 hover:bg-white/10"
                 style={PIXEL_FONT}
               >
@@ -1398,7 +1425,16 @@ export default function PortfolioOsSection({
             <input
               type="text"
               value={newEntryName}
-              onChange={(e) => setNewEntryName(e.target.value)}
+              onChange={(e) => {
+                setNewEntryName(e.target.value);
+                if (explorerError) setExplorerError("");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  createEntryInExplorer("file");
+                }
+              }}
               placeholder="new name..."
               className="arcade-body min-w-0 flex-1 rounded border border-white/15 bg-black/70 px-1.5 py-0.5 text-[11px] text-white placeholder-white/30 focus:border-amber-400 focus:outline-none"
             />
@@ -1421,6 +1457,11 @@ export default function PortfolioOsSection({
               +D
             </button>
           </div>
+          {explorerError && (
+            <p className="arcade-body border-b border-rose-500/30 bg-rose-950/40 px-2 py-1 text-[10px] text-rose-300">
+              {explorerError}
+            </p>
+          )}
           <div className="arcade-body flex-1 space-y-1 overflow-y-auto p-2 text-[12px]">
             {explorerItems.length === 0 ? (
               <p className="py-4 text-center text-white/40">(empty)</p>
@@ -1958,13 +1999,13 @@ export default function PortfolioOsSection({
           <div className="relative z-10 flex-1">
             {/* Mobile quick launcher bar (< md) */}
             <div className="relative z-10 flex flex-wrap gap-2 p-3 md:hidden">
-              {desktopIcons.map((item) => {
+              {DESKTOP_ICONS.map((item) => {
                 const Icon = item.Icon;
                 return (
                   <button
                     key={item.id}
                     type="button"
-                    onClick={item.onOpen}
+                    onClick={() => handleOpenDesktopIcon(item.id)}
                     className={`flex cursor-pointer flex-col items-center gap-1 rounded p-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)] transition focus:outline-none ${item.color}`}
                   >
                     <Icon className="h-6 w-6" />
@@ -1976,14 +2017,14 @@ export default function PortfolioOsSection({
 
             {/* Movable / Draggable Desktop Icons (md+) */}
             <div className="pointer-events-none absolute inset-0 z-10 hidden md:block">
-              {desktopIcons.map((item) => {
+              {DESKTOP_ICONS.map((item) => {
                 const Icon = item.Icon;
                 const pos = iconPositions[item.id];
                 return (
                   <button
                     key={item.id}
                     type="button"
-                    onPointerDown={(e) => startDragIcon(e, item.id, item.onOpen)}
+                    onPointerDown={(e) => startDragIcon(e, item.id, () => handleOpenDesktopIcon(item.id))}
                     style={{ left: pos.x, top: pos.y }}
                     title={`Drag to move or click to open ${item.label}`}
                     className={`pointer-events-auto absolute flex w-16 cursor-grab select-none flex-col items-center gap-1 rounded p-1.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)] transition-colors active:cursor-grabbing focus:outline-none ${item.color}`}
@@ -2037,6 +2078,8 @@ export default function PortfolioOsSection({
                         top: win.y,
                         width: win.w,
                         height: win.h,
+                        maxWidth: "calc(100% - 12px)",
+                        maxHeight: "calc(100% - 56px)",
                         zIndex: win.z,
                       }}
                       className={`pointer-events-auto absolute flex flex-col overflow-hidden rounded border-2 shadow-[0_14px_32px_rgba(0,0,0,0.85)] ${style.border} ${style.bg}`}

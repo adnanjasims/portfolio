@@ -524,6 +524,59 @@ body {
   animation: coin-insert-drop 0.44s cubic-bezier(0.35, 0, 0.65, 1) forwards;
 }
 
+@keyframes chess-click-nudge-left {
+  0% { transform: translateX(0) scale(1); }
+  35% { transform: translateX(-5px) scale(1.15); }
+  70% { transform: translateX(1px) scale(0.95); }
+  100% { transform: translateX(0) scale(1); }
+}
+
+@keyframes chess-click-hop-spin {
+  0% { transform: translateY(0) rotate(0deg) scale(1); }
+  40% { transform: translateY(-4px) rotate(-14deg) scale(1.22); }
+  75% { transform: translateY(1px) rotate(8deg) scale(0.95); }
+  100% { transform: translateY(0) rotate(0deg) scale(1); }
+}
+
+@keyframes chess-click-plus-spin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(90deg) scale(1.22); }
+  100% { transform: rotate(90deg) scale(1); }
+}
+
+@keyframes chess-click-king-tip {
+  0% { transform: rotate(0deg) translateY(0); }
+  40% { transform: rotate(20deg) translateY(2px) scale(1.12); }
+  80% { transform: rotate(-6deg) translateY(0); }
+  100% { transform: rotate(0deg) translateY(0); }
+}
+
+@keyframes chess-click-pop {
+  0% { transform: scale(1); }
+  40% { transform: translateY(-3px) scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.chess-anim-undo {
+  animation: chess-click-nudge-left 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.chess-anim-hint {
+  animation: chess-click-hop-spin 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.chess-anim-new {
+  animation: chess-click-plus-spin 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.chess-anim-resign {
+  animation: chess-click-king-tip 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.chess-anim-pop {
+  animation: chess-click-pop 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
 
   .arcade-boot,
@@ -540,6 +593,11 @@ body {
   .sfx-icon-on,
   .sfx-wave-pulse,
   .coin-insert-anim,
+  .chess-anim-undo,
+  .chess-anim-hint,
+  .chess-anim-new,
+  .chess-anim-resign,
+  .chess-anim-pop,
   .intro-cursor-blink,
   .intro-cursor-detected {
     animation: none !important;

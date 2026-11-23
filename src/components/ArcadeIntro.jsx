@@ -10,6 +10,38 @@ const INTRO_TEXT = "Hi, I'm Adnan. Welcome to my website.";
 const INTRO_GAG_TEXT = "Why are you trying to type here? Scroll.";
 const TYPING_DURATION_MS = 3000;
 
+const DEANS_HONOR_ROLL_PDF_URL =
+  "https://www.ualberta.ca/en/science/media-library/studentservices/dhr-2024-2025-updated.pdf";
+
+function PixelParchmentIcon({ className = "h-6 w-6" }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      className={className}
+      shapeRendering="crispEdges"
+      aria-hidden="true"
+      style={{ imageRendering: "pixelated" }}
+    >
+      {/* White parchment scroll body */}
+      <rect x="3" y="2" width="10" height="12" fill="#f8fafc" />
+      <rect x="2" y="2" width="1" height="3" fill="#cbd5e1" />
+      <rect x="13" y="1" width="1" height="3" fill="#e2e8f0" />
+      <rect x="2" y="12" width="11" height="2" fill="#e2e8f0" />
+      <rect x="3" y="1" width="10" height="1" fill="#94a3b8" />
+      <rect x="3" y="14" width="10" height="1" fill="#64748b" />
+      {/* Subtle parchment text lines */}
+      <rect x="5" y="4" width="6" height="1" fill="#94a3b8" />
+      <rect x="5" y="6" width="6" height="1" fill="#94a3b8" />
+      <rect x="5" y="8" width="4" height="1" fill="#94a3b8" />
+      {/* Red ribbon & wax seal */}
+      <rect x="9" y="9" width="4" height="4" fill="#ef4444" />
+      <rect x="10" y="10" width="2" height="2" fill="#dc2626" />
+      <rect x="9" y="13" width="1" height="2" fill="#b91c1c" />
+      <rect x="12" y="13" width="1" height="2" fill="#b91c1c" />
+    </svg>
+  );
+}
+
 function PixelCodeLogo({ className = "h-7 w-7" }) {
   return (
     <svg
@@ -481,12 +513,17 @@ export default function ArcadeIntro({ startTyping = false }) {
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
-                <h3
-                  className="text-[15px] leading-snug tracking-wide text-[#FECB00] sm:text-[17px]"
-                  style={PIXEL_FONT}
-                >
-                  University of Alberta
-                </h3>
+                <div>
+                  <h3
+                    className="text-[15px] leading-snug tracking-wide text-[#FECB00] sm:text-[17px]"
+                    style={PIXEL_FONT}
+                  >
+                    University of Alberta
+                  </h3>
+                  <p className="arcade-body mt-1 text-[13.5px] text-[#a7d4ba] sm:text-[14.5px]">
+                    Edmonton, Alberta, Canada
+                  </p>
+                </div>
                 <p className="arcade-body shrink-0 text-[14.5px] font-medium tabular-nums text-[#a7d4ba] sm:text-[16px]">
                   Sep 2022 – Dec 2026
                 </p>
@@ -496,7 +533,7 @@ export default function ArcadeIntro({ startTyping = false }) {
                 Bachelor of Science (B.Sc.), Computer Science
               </p>
 
-              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[#275D38]/80 pt-2.5">
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[#275D38]/80 pt-2.5">
                 <p className="arcade-body text-[15px] text-[#b7dec8] sm:text-[17px]">
                   <span className="font-semibold tabular-nums text-[#FECB00]">3.6</span>{" "}
                   GPA
@@ -504,9 +541,16 @@ export default function ArcadeIntro({ startTyping = false }) {
                 <span className="text-[#275D38]" aria-hidden="true">
                   |
                 </span>
-                <p className="arcade-body text-[15px] font-medium text-[#e6f5ec] sm:text-[17px]">
-                  Faculty of Science Dean&apos;s Honor Roll
-                </p>
+                <a
+                  href={DEANS_HONOR_ROLL_PDF_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Open Faculty of Science Dean's Honor Roll list (PDF)"
+                  className="arcade-body inline-flex items-center gap-2 rounded border-2 border-[#FECB00]/60 bg-[#04120b]/90 px-3 py-1 text-[14.5px] font-semibold text-[#f3faf5] shadow-[0_4px_12px_rgba(0,0,0,0.45)] transition hover:-translate-y-0.5 hover:border-[#FECB00] hover:bg-[#0d3320] hover:text-[#FECB00] sm:text-[16px]"
+                >
+                  <PixelParchmentIcon className="h-6 w-6 shrink-0" />
+                  <span>Faculty of Science Dean&apos;s Honor Roll</span>
+                </a>
               </div>
             </div>
           </div>
